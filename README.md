@@ -1,5 +1,17 @@
 This sample app provides a simple `Hello` web app based on Spring Boot and Spring Cloud Function.
 
+Which topics are addressed here:
+* Build a JVM or Native image with Spring Boot and GraalVM
+* Run locally or in Kubernetes / Knative / Tanzu Serveless
+* Install Tanzu Serverless 
+* Use-cases:
+  * [x] Deployment of containers 
+  * [x] Scale-to-zero, automatically
+  * [x] Dynamic resource configurations (memory, CPU cycles, concurrency, etc)
+  * [x] Allow versioning of deployments and snapshots (deployed codes and configurations)
+  * [x] Executing a particular version of a function
+  * [x] Load-testing functions
+
 Build Options:
 * JVM application, leveraging OpenJDK
 * Native Application, leveraging GraalVM
@@ -239,3 +251,110 @@ Service 'hello-function' updated to latest revision 'hello-function-v2' is avail
 http://hello-function.hello-function.35.184.97.2.xip.io
 ```
 
+### Executing a specific revision of a function
+
+When creating revision 2, a `tag` labelled `canary` has been added to the route for the revision (see https://knative.dev/docs/serving/using-subroutes/).
+
+A tag applied to a route leads to an address for the specific traffic target to be created.
+You can access that specific revision by prefixing `tag-` to the route
+```shell
+$ curl -w'\n' -H 'Content-Type: text/plain' http://canary-hello-function.hello-function.35.184.97.2.xip.io -d "native-function"
+
+Hello from Serverless Test - from revision 2 of Spring Function on JVM
+```
+
+A tag can be also specified to an existing revision directly
+```shell
+$ kn service update hello-function -n hello-function  --tag hello-function-v1=stable
+Updating Service 'hello-function' in namespace 'hello-function':
+
+  0.132s Ingress has not yet been reconciled.
+  0.174s Waiting for Envoys to receive Endpoints data.
+  1.903s Waiting for load balancer to be ready
+  2.122s Ready to serve.
+
+Service 'hello-function' with latest revision 'hello-function-v2' (unchanged) is available at URL:
+http://hello-function.hello-function.35.184.97.2.xip.io
+
+# test with the stable revision
+$  curl -w'\n' -H 'Content-Type: text/plain' http://stable-hello-function.hello-function.35.184.97.2.xip.io -d "test"
+Hello from Serverless Test - Spring Function on JVM
+
+# test with the canary
+$  curl -w'\n' -H 'Content-Type: text/plain' http://canary-hello-function.hello-function.35.184.97.2.xip.io -d "test"
+Hello from Serverless Test - from revision 2 of Spring Function on JVM
+```
+
+### Setting requests and limits dynamically
+```shell
+# create the service with requests and limits
+$ kn service create hello-limits -n hello-function --image triathlonguy/hello-function:jvm --env TARGET="from Serverless Test - with limits" --revision-name hello-limits-v1 --request memory=200Mi,cpu=200m --limit cpu=450m
+
+# update the service with requests and limits dynamically
+$ kn service update hello-limits -n hello-function --limit cpu=450m,memory=1Gi
+
+# generated YAML shows the limits set above when creating the service, as an example
+---
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+...
+spec:
+  template:
+    metadata:
+      annotations:
+        client.knative.dev/user-image: triathlonguy/hello-function:jvm
+      creationTimestamp: null
+      name: hello-limits-v1
+    spec:
+      containerConcurrency: 0
+      containers:
+        - env:
+            - name: TARGET
+              value: from Serverless Test - with limits
+          image: triathlonguy/hello-function:jvm
+          name: user-container
+          readinessProbe:
+            successThreshold: 1
+            tcpSocket:
+              port: 0
+          resources:
+            limits:
+              cpu: 450m
+            requests:
+              cpu: 200m
+              memory: 200Mi
+      enableServiceLinks: false
+      timeoutSeconds: 300
+  traffic:
+    - latestRevision: true
+      percent: 100
+status:
+  address:
+    url: http://hello-limits.hello-function.svc.cluster.local
+...
+  traffic:
+    - latestRevision: true
+      percent: 100
+      revisionName: hello-limits-v1
+  url: http://hello-limits.hello-function.35.184.97.2.xip.io
+```
+
+### Setting auto-scaling dynamically
+```shell
+# auto-scale up when the concurrent number of requests in the container hits 50
+$ kn service update hello-limits -n hello-function --concurrency-limit 50
+
+# load-test with Siege
+$ siege  -c200 -t20S  --content-type="text/plain" 'http://hello-limits.hello-function.35.184.97.2.xip.io POST test'
+
+# YAML change indicates the limit for concurrency
+spec:
+  containerConcurrency: 50
+  containers:
+    - env:
+        - name: TARGET
+          value: from Serverless Test - with limits
+      image: index.docker.io/triathlonguy/hello-function@sha256:ef7bef1e145f85ff9e34ad12c163b91cc4dcc6e5c28d1c02052b184131155f01
+```
