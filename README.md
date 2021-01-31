@@ -1,16 +1,25 @@
 This sample app provides a simple `Hello` web app based on Spring Boot and Spring Cloud Function.
 
-Which topics are addressed here:
-* Build a JVM or Native image with Spring Boot and GraalVM
-* Run locally or in Kubernetes / Knative / Tanzu Serveless
+Which topics are addressed in this repo:
+* Build
+  *  Build a JVM or Native image with Spring Boot and GraalVM
+  *  Run locally
+* Deployment
+  * Kubernetes / Knative / Tanzu Serveless
 * Install Tanzu Serverless 
-* Use-cases:
-  * [x] Deployment of containers 
+* Serverless use-cases:
+  * [x] Deployment of containers with the KNative(kn) CLI 
   * [x] Scale-to-zero, automatically
-  * [x] Dynamic resource configurations (memory, CPU cycles, concurrency, etc)
   * [x] Allow versioning of deployments and snapshots (deployed codes and configurations)
+  * [x] Blue-Green and Canary deployments
+    * It can be done in K8s
+    * How to do B/G with the KNative(kn) CLI
+      * Dynamic traffic splitting
+      * Use Octant UI Plugin
+  * [x] Dynamic resource configurations (memory, CPU cycles, concurrency, etc)
   * [x] Executing a particular version of a function
   * [x] Load-testing functions
+  * [x] Delete a deployed service
 
 Build Options:
 * JVM application, leveraging OpenJDK
@@ -130,7 +139,7 @@ You can containerize this template app and deploy it as a Knative Service.
 
 For general guidance, see the [Hello World - Spring Boot Java](https://knative.dev/docs/serving/samples/hello-world/helloworld-java-spring/) sample for details.
 
-# Tanzu Serverless Deployment
+# Install Tanzu Serverless
 
 Info URL: https://tanzu.vmware.com/serverless
 Download: 
@@ -175,9 +184,20 @@ $ kubectl create secret docker-registry ${SECRET_NAME} -n ${SECRET_NS} \
 $ ./bin/install-serverless.sh
 ```
 
-## Tanzu Serverless - demo features
+# Serverless use-cases
 
-### Deployment of containers
+## Deployment of containers
+
+To start deploying without having to build the images, they are available in DockerHub:
+```shell
+$ docker pull triathlonguy/hello-function:jvm
+
+$ docker pull triathlonguy/hello-function:blue
+$ docker pull triathlonguy/hello-function:green
+
+$ docker pull triathlonguy/hello-function:native
+```
+
 ```shell
 $ kubectl cluster-info
 
@@ -221,19 +241,44 @@ $ curl -w'\n' -H 'Content-Type: text/plain' http://hello-function.hello-function
 $ siege -d1  -c50 -t10S  --content-type="text/plain" 'http://hello-function.hello-function.35.184.97.2.xip.io POST test'
 ```
 
-### Automatic scale-to-zero
+## Automatic scale-to-zero
 ```shell
 # load test the service with Siege
 # install on Mac with `brew install siege` 
-$ siege -d1  -c200 -t10S  --content-type="text/plain" 'http://hello-function.hello-function.35.184.97.2.xip.io POST from-my-function'
+$ siege -d1  -c200 -t60S  --content-type="text/plain" 'http://hello-function.hello-function.35.184.97.2.xip.io POST from-my-function'
 
 # observe the function instances scaling up and, after 60s of inactivity, terminate and scale all the way back to zero.
 ```
 
 ### Create a service revision
+When creating a revision, if the `traffic` parameter is not specified, all traffic will be routed to the new revision, which automatically becomes the `@latest`.
+Check the traffic allocation from the initial service creation with `revision-name=hello-function-v1`.
+
+Note that the deployment is done automatically by KNative with zero-downtime, using a `blue-green deployment` pattern!
+```shell
+# revision hello-function-1 gets 100% of the traffic
+$ kn service describe hello-function -n hello-function
+        Name:       hello-function
+        Namespace:  hello-function
+        Age:        3m
+        URL:        http://hello-function.hello-function.35.184.97.2.xip.io
+
+        Revisions:  
+          100%  @latest (hello-function-v1) [1] (3m)
+                Image:  triathlonguy/hello-function:jvm (pinned to ef7bef)
+
+        Conditions:  
+          OK TYPE                   AGE REASON
+          ++ Ready                   3m 
+          ++ ConfigurationsReady     3m 
+          ++ RoutesReady             3m 
+```
+
+To create a new revision, however maintain the traffic on the previous revision, set the `traffic` parameter and prevent the new deployment to use the new revision.
+This allow a `blue-green` deployment type of testing, as shown in future paragraphs.
 ```shell
 # create revision hello-function-v2
-$ kn service update hello-function -n hello-function --image triathlonguy/hello-function:jvm --env TARGET="from Serverless Test - from revision 2 of Spring Function on JVM" --revision-name hello-function-v2 --traffic @latest=50,hello-function-v1=50 --tag @latest=canary
+$ kn service update hello-function -n hello-function --image triathlonguy/hello-function:jvm --env TARGET="from Serverless Test - from revision 2 of Spring Function on JVM" --revision-name hello-function-v2 --traffic @latest=0,hello-function-v1=100
 
 Updating Service 'hello-function' in namespace 'hello-function':
 
@@ -251,41 +296,106 @@ Service 'hello-function' updated to latest revision 'hello-function-v2' is avail
 http://hello-function.hello-function.35.184.97.2.xip.io
 ```
 
+KN CLI allows us to `describe` the service and indicate that traffic still goes to the previous revision, while the new one gets zero traffic
+```shell
+$ kn service describe hello-function -n hello-function
+Name:       hello-function
+Namespace:  hello-function
+Age:        12m
+URL:        http://hello-function.hello-function.35.184.97.2.xip.io
+
+Revisions:  
+     +  hello-function-v2 (current @latest) [2] (1m)
+        Image:  triathlonguy/hello-function:jvm (pinned to ef7bef)
+  100%  hello-function-v1 [1] (12m)
+        Image:  triathlonguy/hello-function:jvm (pinned to ef7bef)
+
+Conditions:  
+  OK TYPE                   AGE REASON
+  ++ Ready                   1m 
+  ++ ConfigurationsReady     1m 
+  ++ RoutesReady             1m 
+```
+
 ### Executing a specific revision of a function
 
-When creating revision 2, a `tag` labelled `canary` has been added to the route for the revision (see https://knative.dev/docs/serving/using-subroutes/).
+To access a specific revision of a service, routing can be set up by assigning a tag to the revision (see https://knative.dev/docs/serving/using-subroutes/).
 
 A tag applied to a route leads to an address for the specific traffic target to be created.
-You can access that specific revision by prefixing `tag-` to the route
+You can access that specific revision by prefixing `tag-` to the route.
+
+For example, let's update revision `hello-function-v2` and assign the tag `candidate` to the revision. 
+This allows us to test this candidate revision before sending any traffic to it.
 ```shell
-$ curl -w'\n' -H 'Content-Type: text/plain' http://canary-hello-function.hello-function.35.184.97.2.xip.io -d "native-function"
+$ kn service update hello-function -n hello-function  --tag hello-function-v2=candidate
+
+$ kubectl get svc  -n hello-function 
+NAME                                              TYPE           CLUSTER-IP    EXTERNAL-IP                                PORT(S)                             AGE
+candidate-hello-function                          ExternalName   <none>        envoy.contour-internal.svc.cluster.local   80/TCP                              85s
+...
+
+$ curl -w'\n' -H 'Content-Type: text/plain' http://candidate-hello-function.hello-function.35.184.97.2.xip.io -d "native-function"
 
 Hello from Serverless Test - from revision 2 of Spring Function on JVM
 ```
 
-A tag can be also specified to an existing revision directly
+## Blue-Green and Canary deployments
+
+### It can be done in K8s
+Blue-green deployment can be done in K8s, as shown in the following Tanzu Developer Center Blog Post: [Declarative Deployments in Kubernetes: What Options Do I Have?](https://github.com/ddobrin/declarative-deployments-k8s#5)
+
+### How to do B/G with the KNative(kn) CLI
+When creating a revision, if the `traffic` parameter is not specified, all traffic will be routed to the new revision, which automatically becomes the `@latest`.
+Check the traffic allocation from the initial service creation with `revision-name=hello-function-v1`.
+
+To avoid the automatic traffic re-routing, a new revision should be created `without traffic routed to it` and `while specifying tag` (see above for both), in order to allow testing of the `green` version, and changing `blue` to `green` at a later time, after testing.
+
+Let's reset the test by deploying a new image, as revision 3 and label it as the `blue` version, stable, and with traffic routed to it.
+`green` will follow :
 ```shell
-$ kn service update hello-function -n hello-function  --tag hello-function-v1=stable
-Updating Service 'hello-function' in namespace 'hello-function':
+$ kn service update hello-function -n hello-function --image triathlonguy/hello-function:blue --env TARGET="from Serverless Test - from revision BLUE of Spring Function on JVM" --revision-name hello-function-blue --traffic @latest=100 --tag hello-function-blue=stable
 
-  0.132s Ingress has not yet been reconciled.
-  0.174s Waiting for Envoys to receive Endpoints data.
-  1.903s Waiting for load balancer to be ready
-  2.122s Ready to serve.
+## testing the BLUE revision
+$ curl -w'\n' -H 'Content-Type: text/plain' http://stable-hello-function.hello-function.35.184.97.2.xip.io -d "test"
+Hello from Serverless Test - from revision BLUE of Spring Function on JVM
 
-Service 'hello-function' with latest revision 'hello-function-v2' (unchanged) is available at URL:
-http://hello-function.hello-function.35.184.97.2.xip.io
+## deploy the GREEN revision, with tag green-candidate, and image tag green
+$ kn service update hello-function -n hello-function --image triathlonguy/hello-function:green --env TARGET="from Serverless Test - from revision GREEN of Spring Function on JVM" --revision-name hello-function-green --traffic @latest=0,hello-function-blue=100 --tag hello-function-green=green-candidate
 
-# test with the stable revision
-$  curl -w'\n' -H 'Content-Type: text/plain' http://stable-hello-function.hello-function.35.184.97.2.xip.io -d "test"
-Hello from Serverless Test - Spring Function on JVM
+## testing the GREEN revision
+$ curl -w'\n' -H 'Content-Type: text/plain' http://green-candidate-hello-function.hello-function.35.184.97.2.xip.io -d "test"
+Hello from Serverless Test - from revision GREEN of Spring Function on JVM
 
-# test with the canary
-$  curl -w'\n' -H 'Content-Type: text/plain' http://canary-hello-function.hello-function.35.184.97.2.xip.io -d "test"
-Hello from Serverless Test - from revision 2 of Spring Function on JVM
+## Switch traffic from BLUE to GREEN after testing of GREEN has been completed
+
+# first, we untag the stable tag from the BLUE revision 
+# function route still points to BLUE
+$ kn service update hello-function -n hello-function --untag stable
+
+$ curl -w'\n' -H 'Content-Type: text/plain' http://hello-function.hello-function.35.184.97.2.xip.io -d "test"
+Hello from Serverless Test - from revision BLUE of Spring Function on JVM
+
+## switch traffic to GREEN and assign green as STABLE
+kn service update hello-function -n hello-function --tag hello-function-green=stable --traffic hello-function-green=100
+
+## traffic points to the new route
+$ curl -w'\n' -H 'Content-Type: text/plain' http://hello-function.hello-function.35.184.97.2.xip.io -d "test"
+Hello from Serverless Test - from revision GREEN of Spring Function on JVM
+
+## testing by revision, the STABLE tag points to the GREEN revision
+$ curl -w'\n' -H 'Content-Type: text/plain' http://stable-hello-function.hello-function.35.184.97.2.xip.io -d "test"
+Hello from Serverless Test - from revision GREEN of Spring Function on JVM
 ```
 
-### Setting requests and limits dynamically
+### Canary deployment 
+For canary deployments, when deploying a new revision, traffic can be set to a small percentage, tested, then the canary can become the new version
+```shell
+# deploy the canary version
+$ kn service update hello-function -n hello-function --image triathlonguy/hello-function:jvm --env TARGET="from Serverless Test - from revision CANARY of Spring Function on JVM" --revision-name hello-function-canary --traffic @latest=10,hello-function-green=90 --tag hello-function-canary=canary
+
+```
+
+# Setting requests and limits dynamically
 ```shell
 # create the service with requests and limits
 $ kn service create hello-limits -n hello-function --image triathlonguy/hello-function:jvm --env TARGET="from Serverless Test - with limits" --revision-name hello-limits-v1 --request memory=200Mi,cpu=200m --limit cpu=450m
@@ -357,4 +467,10 @@ spec:
         - name: TARGET
           value: from Serverless Test - with limits
       image: index.docker.io/triathlonguy/hello-function@sha256:ef7bef1e145f85ff9e34ad12c163b91cc4dcc6e5c28d1c02052b184131155f01
+```
+
+## Delete a deployed Service
+The service can be deleted from the KN CLI:
+```shell
+$ kn service delete hello-function -n hello-function
 ```
