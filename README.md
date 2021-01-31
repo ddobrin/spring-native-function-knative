@@ -11,13 +11,13 @@ Which topics are addressed in this repo:
   * [x] Deployment of containers with the KNative(kn) CLI 
   * [x] Scale-to-zero, automatically
   * [x] Allow versioning of deployments and snapshots (deployed codes and configurations)
+  * [x] Executing a particular version of a function
   * [x] Blue-Green and Canary deployments
     * It can be done in K8s
     * How to do B/G with the KNative(kn) CLI
       * Dynamic traffic splitting
       * Use Octant UI Plugin
   * [x] Dynamic resource configurations (memory, CPU cycles, concurrency, etc)
-  * [x] Executing a particular version of a function
   * [x] Load-testing functions
   * [x] Delete a deployed service
 
@@ -393,6 +393,59 @@ For canary deployments, when deploying a new revision, traffic can be set to a s
 # deploy the canary version
 $ kn service update hello-function -n hello-function --image triathlonguy/hello-function:jvm --env TARGET="from Serverless Test - from revision CANARY of Spring Function on JVM" --revision-name hello-function-canary --traffic @latest=10,hello-function-green=90 --tag hello-function-canary=canary
 
+# testing will respect the traffic percentage set above
+$ curl -w'\n' -H 'Content-Type: text/plain' http://hello-function.hello-function.35.184.97.2.xip.io -d "test"
+Hello from Serverless Test - from revision GREEN of Spring Function on JVM
+$ curl -w'\n' -H 'Content-Type: text/plain' http://hello-function.hello-function.35.184.97.2.xip.io -d "test"
+Hello from Serverless Test - from revision CANARY of Spring Function on JVM
+$ curl -w'\n' -H 'Content-Type: text/plain' http://hello-function.hello-function.35.184.97.2.xip.io -d "test"
+Hello from Serverless Test - from revision GREEN of Spring Function on JVM
+...
+
+# traffic can be routed 100% to the canary revision when testing is complete
+kn service update hello-function -n hello-function --traffic @latest=100
+
+# traffic is routed only to the latest revision, which was canary
+$ curl -w'\n' -H 'Content-Type: text/plain' http://hello-function.hello-function.35.184.97.2.xip.io -d "test"
+Hello from Serverless Test - from revision CANARY of Spring Function on JVM
+```
+
+Revisions can be listed as follows:
+```shell
+# KNative
+$ kn service describe hello-function -n hello-function
+Name:       hello-function
+Namespace:  hello-function
+Age:        2h
+URL:        http://hello-function.hello-function.35.184.97.2.xip.io
+
+Revisions:  
+     +  hello-function-canary (current @latest) #canary [5] (26m)
+        Image:  triathlonguy/hello-function:jvm (pinned to ef7bef)
+  100%  @latest (hello-function-canary) [5] (26m)
+        Image:  triathlonguy/hello-function:jvm (pinned to ef7bef)
+     +  hello-function-green #green-candidate [4] (45m)
+        Image:  triathlonguy/hello-function:green (pinned to ef7bef)
+     +  hello-function-green #stable [4] (45m)
+        Image:  triathlonguy/hello-function:green (pinned to ef7bef)
+     +  hello-function-v2 #candidate [2] (1h)
+        Image:  triathlonguy/hello-function:jvm (pinned to ef7bef)
+
+Conditions:  
+  OK TYPE                   AGE REASON
+  ++ Ready                   4m 
+  ++ ConfigurationsReady    26m 
+  ++ RoutesReady             4m 
+
+# Kubernetes
+$ kubectl get deploy -n hello-function
+NAME                                                 READY   UP-TO-DATE   AVAILABLE   AGE
+hello-function-blue-deployment                       0/0     0            0           52m
+hello-function-canary-deployment                     0/0     0            0           25m
+hello-function-green-deployment                      0/0     0            0           45m
+hello-function-native-hello-function-v1-deployment   0/0     0            0           4h10m
+hello-function-v1-deployment                         0/0     0            0           126m
+hello-function-v2-deployment                         0/0     0            0           115m
 ```
 
 # Setting requests and limits dynamically
