@@ -63,7 +63,7 @@
                         <configuration>
                             <image>
                                 <builder>paketobuildpacks/builder:base</builder>
-                                <name>${project.artifactId}:jvm</name>
+                                <name>triathlonguy/${project.artifactId}:jvm</name>
                             </image>
                         </configuration>
                         <executions>

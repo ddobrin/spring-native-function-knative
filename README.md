@@ -334,7 +334,7 @@ NAME                                              TYPE           CLUSTER-IP    E
 candidate-hello-function                          ExternalName   <none>        envoy.contour-internal.svc.cluster.local   80/TCP                              85s
 ...
 
-$ curl -w'\n' -H 'Content-Type: text/plain' http://candidate-hello-function.hello-function.35.184.97.2.xip.io -d "native-function"
+$ curl -w'\n' -H 'Content-Type: text/plain' http://candidate-hello-function.hello-function.35.184.97.2.xip.io -d "test"
 
 Hello from Serverless Test - from revision 2 of Spring Function on JVM
 ```

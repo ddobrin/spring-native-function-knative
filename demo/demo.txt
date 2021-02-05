@@ -1,0 +1,69 @@
+# concurrency limit 1
+kn service create hello-function -n hello-function --image triathlonguy/hello-function:jvm --env TARGET="from Serverless Test - Spring Function on JVM" --revision-name hello-function-v1 --concurrency-limit 1 --autoscale-window 15s
+
+curl -w'\n' -H 'Content-Type: text/plain' http://hello-function.hello-function.35.184.97.2.xip.io -d "test"
+
+#scale up
+siege -d1  -c10 -t1S  --content-type="text/plain" 'http://hello-function.hello-function.35.184.97.2.xip.io POST test'
+kn service delete hello-function -n hello-function
+
+# reset the service
+kn service create hello-function -n hello-function --image triathlonguy/hello-function:jvm --env TARGET="from Serverless Test - Spring Function on JVM" --revision-name hello-function-v1 --concurrency-limit 25 --autoscale-window 15s
+
+# revision hello-function-1 gets 100% of the traffic
+kn service describe hello-function -n hello-function
+
+# create revision hello-function-v2
+kn service update hello-function -n hello-function --image triathlonguy/hello-function:jvm --env TARGET="from Serverless Test - from revision 2 of Spring Function on JVM" --revision-name hello-function-v2 --traffic @latest=0,hello-function-v1=100
+
+# tag a revision
+kn service update hello-function -n hello-function  --tag hello-function-v2=candidate
+curl -w'\n' -H 'Content-Type: text/plain' http://candidate-hello-function.hello-function.35.184.97.2.xip.io -d "2nd-function"
+------------------
+# blue
+kn service update hello-function -n hello-function --image triathlonguy/hello-function:blue --env TARGET="from Serverless Test - from revision BLUE of Spring Function on JVM" --revision-name hello-function-blue --traffic @latest=100 --tag hello-function-blue=stable --concurrency-limit 25 --autoscale-window 15s
+
+# test blue
+curl -w'\n' -H 'Content-Type: text/plain' http://stable-hello-function.hello-function.35.184.97.2.xip.io -d "test"
+
+# housekeeping
+kn service update hello-function -n hello-function --untag candidate
+
+# green
+kn service update hello-function -n hello-function --image triathlonguy/hello-function:green --env TARGET="from Serverless Test - from revision GREEN of Spring Function on JVM" --revision-name hello-function-green --traffic @latest=0,hello-function-blue=100 --tag hello-function-green=green-candidate
+
+# revision list
+kn revision list -s hello-function -n hello-function
+
+# untag stable
+kn service update hello-function -n hello-function --untag stable
+
+# switch green
+kn service update hello-function -n hello-function --untag green-candidate
+kn service update hello-function -n hello-function --tag hello-function-green=stable --traffic hello-function-green=100
+----------------------
+# deploy the canary version
+kn service update hello-function -n hello-function --image triathlonguy/hello-function:jvm --env TARGET="from Serverless Test - from revision CANARY of Spring Function on JVM" --revision-name hello-function-canary --traffic @latest=10,hello-function-green=90 --tag hello-function-canary=canary
+
+kn service update hello-function -n hello-function --traffic @latest=100
+-----------------------------------------------------
+
+# delete
+kn service delete hello-function -n hello-function
+
+
+-----------------------------------------------------
+kn service delete hello-limits -n hello-function
+
+# create the service with requests and limits
+kn service create hello-limits -n hello-function --image triathlonguy/hello-function:jvm --env TARGET="from Serverless Test - with limits" --revision-name hello-limits-v1 --request memory=200Mi,cpu=200m --limit cpu=450m --autoscale-window 15s
+
+# update the service with requests and limits dynamically
+kn service update hello-limits -n hello-function --limit cpu=450m,memory=1Gi
+
+# concurrency limit
+kn service update hello-limits -n hello-function --concurrency-limit 50
+siege  -c200 -t20S  --content-type="text/plain" 'http://hello-limits.hello-function.35.184.97.2.xip.io POST test'
+------------------------
+# cleanup
+kn service delete hello-limits -n hello-function
