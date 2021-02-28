@@ -1,11 +1,13 @@
-This sample app provides a simple `Hello` web app based on Spring Boot and Spring Cloud Function.
+This sample app provides a simple `Hello` web app based on Spring Boot and Spring Cloud Functions.
+It provides multiple deployment options and common Knative use-cases which developers are looking for.
 
-Which topics are addressed in this repo:
+This repo addresses the following topics:
 * Build
-  *  Build a JVM or Native image with Spring Boot and GraalVM
-  *  Run locally
-* Deployment
-  * Kubernetes / Knative / Tanzu Serveless
+  * Build a JVM / Native app image with the Spring Boot plugin and GraalVM
+  * Build a JVM / Native Docker image with Java and Java Native Paketo Buildpacks
+* CI/CD integration - Build a JVM / Native Docker image with kpack / Tanzu Build Service
+* Deploy
+  * Run locally / Kubernetes / Knative / Tanzu Serveless
 * Install Tanzu Serverless 
 * Serverless use-cases:
   * [x] Deployment of containers with the KNative(kn) CLI 
@@ -61,12 +63,12 @@ src
 
 # Build
 
-Building the code with the Spring Boot Maven wrapper leverages the following profiles:
-* native-image - build a Spring Native image leveraging GraalVM
-* jvm-image - build a Spring JVM-based image leveraging OpenJDK
+Building the code with the Spring Boot Maven wrapper leverages the following Maven profiles:
+* `native-image` - build a Spring Native image leveraging GraalVM
+* `jvm-image` - build a Spring JVM-based image leveraging OpenJDK
 
-Building an executable application with the GraalVM compiler leverages the profile and requires the installation of the GraalVM and the native-image builder utility:
-* native
+Building an executable application with the GraalVM compiler leverages the following Maven profile and requires the installation of the GraalVM and the native-image builder utility:
+* `native`
 
 ## Build code as a JVM app using the Spring Boot Maven plugin with embedded Netty HTTP server
 ```bash 
@@ -76,7 +78,7 @@ $ ./mvnw clean spring-boot:run
 # test locally
 $ curl -w'\n' -H 'Content-Type: text/plain' localhost:8080 -d "from a Function"
 ```
-## Build code as a Native app using the GraalVM compiler with embedded Netty HTTP server
+## Build code as a Native JVM app using the GraalVM compiler with embedded Netty HTTP server
 ```bash 
 # switch to the GraalVM JDK for this build
 # ex, when using SDKman
@@ -92,7 +94,7 @@ $ ./target/hello-function
 $ curl -w'\n' -H 'Content-Type: text/plain' localhost:8080 -d "from a Function"
 ```
 
-## Build code as a JVM image using the Spring Boot Maven plugin
+## Build code as a JVM image using the Spring Boot Maven plugin and Java Paketo Buildpacks
 ```bash 
 # build image with default configuration
 $ ./mvnw clean spring-boot:build-image
@@ -118,8 +120,66 @@ $ docker run -p 8080:8080 hello-function:tiny
 # test Docker image locally
 $ curl -w'\n' -H 'Content-Type: text/plain' localhost:8080 -d "from a Function"
 ```
+# CI/CD integration - Build a JVM / Native Docker image with kpack / Tanzu Build Service
 
-# Deployment
+To build an image with Java or Java Native Paketo Buildpacks with kpack or the Tanzu Build Service, you can use the commands listed below.
+
+To start, install the tools as follows:
+* `kpack CLI` - https://github.com/vmware-tanzu/kpack-cli 
+  * kpack commands - https://github.com/vmware-tanzu/kpack-cli/blob/master/docs/kp.md 
+* `kpack` - https://github.com/pivotal/kpack 
+* Tanzu Build Service - https://network.pivotal.io/products/build-service/ 
+  * Build Service Documentation - https://docs.pivotal.io/build-service/1-1/ 
+
+## Building JVM Docker images
+To build the JVM image with the Java Paketo Buildpack, please run:
+```shell
+$ kp image save hello-function-jvm \ 
+    --tag <your-repo-prefix>/hello-function:jvm \ 
+    --git https://github.com/ddobrin/spring-native-function-knative.git \
+    --git-revision main \
+    --cluster-builder base \ 
+    --env BP_JVM_VERSION=11 \
+    --env BP_MAVEN_BUILD_ARGUMENTS="-Dmaven.test.skip=true package spring-boot:repackage" \
+    --wait 
+
+* tag - image tag
+* git - repo location 
+* local-path - to build from a local download of the repo, replace "git" with "local-path"
+        --local-path ~/spring-native-function-knative
+* git-revision - the code branch in Git
+* cluster-builder - the Paketo builder used to build the image
+* BP_JVM_VERSION - Java version to build for, accepts 8, 11
+* wait - if you wish to observe the build taking place
+* BP_MAVEN_BUILD_ARGUMENTS - kpack/TBS works declaratively in K8s, therefore requires instructions for the `repackaging` goal to be triggered; local machine is imperative and `package` in pom.xml is sufficient. 
+```
+
+## Building Java Native Docker images
+To build the JVM image with the Java Native Paketo Buildpack, please run:
+```shell
+$ kp image save hello-function-native \ 
+    --tag <your-repo-prefix>/hello-function:native \ 
+    --git https://github.com/ddobrin/spring-native-function-knative.git \
+    --git-revision main \
+    --cluster-builder base \ 
+    --env BP_JVM_VERSION=11 \
+    --env BP_MAVEN_BUILD_ARGUMENTS="-Dmaven.test.skip=true package spring-boot:repackage" \
+    --env BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS="-Dspring.spel.ignore=true -Dspring.xml.ignore=true -Dspring.native.remove-yaml-support=true --enable-all-security-services"
+    --wait 
+
+* tag - image tag
+* git - repo location 
+* local-path - to build from a local download of the repo, replace "git" with "local-path"
+        --local-path ~/spring-native-function-knative
+* git-revision - the code branch in Git
+* cluster-builder - the Paketo builder used to build the image
+* BP_JVM_VERSION - Java version to build for, accepts 8, 11
+* wait - if you wish to observe the build taking place
+* BP_MAVEN_BUILD_ARGUMENTS - kpack/TBS works declaratively in K8s, therefore requires instructions for the `repackaging` goal to be triggered; local machine is imperative and `package` in pom.xml is sufficient. 
+* BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS - optimization arguments for the Native image to minimize image size
+```
+
+# Deploy
 
 ## Kubernetes Deployment and Service
 
@@ -188,13 +248,16 @@ $ ./bin/install-serverless.sh
 
 ## Deployment of containers
 
-To start deploying without having to build the images, they are available in DockerHub:
+To start deploying without having to build the images, they are already available in DockerHub:
 ```shell
+# JVM image
 $ docker pull triathlonguy/hello-function:jvm
 
+# JVM image for B/G
 $ docker pull triathlonguy/hello-function:blue
 $ docker pull triathlonguy/hello-function:green
 
+# Native JVM image
 $ docker pull triathlonguy/hello-function:native
 ```
 
