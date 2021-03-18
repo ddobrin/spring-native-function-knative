@@ -2,14 +2,14 @@ This sample app provides a simple `Hello` web app based on Spring Boot and Sprin
 It provides multiple deployment options and common Knative use-cases which developers are looking for.
 
 This repo addresses the following topics:
-* Build
+* --- Build ---
   * Build a JVM / Native app image with the Spring Boot plugin and GraalVM
   * Build a JVM / Native Docker image with Java and Java Native Paketo Buildpacks
 * CI/CD integration - Build a JVM / Native Docker image with kpack / Tanzu Build Service
-* Deploy
+* --- Deploy ---
   * Run locally / Kubernetes / Knative / Tanzu Serveless
-* Install Tanzu Serverless 
-* Serverless use-cases:
+* ---Install Tanzu Serverless ---
+* --- Serverless use-cases: ---
   * [x] Deployment of containers with the KNative(kn) CLI 
   * [x] Scale-to-zero, automatically
   * [x] Allow versioning of deployments and snapshots (deployed codes and configurations)
@@ -73,7 +73,7 @@ Building an executable application with the GraalVM compiler leverages the follo
 ## Build code as a JVM app using the Spring Boot Maven plugin with embedded Netty HTTP server
 ```bash 
 # build and run code using
-$ ./mvnw clean spring-boot:run
+$ ./mvnw clean package spring-boot:run
 
 # test locally
 $ curl -w'\n' -H 'Content-Type: text/plain' localhost:8080 -d "from a Function"
