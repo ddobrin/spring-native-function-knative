@@ -2,14 +2,14 @@ This sample app provides a simple `Hello` web app based on Spring Boot and Sprin
 It provides multiple deployment options and common Knative use-cases which developers are looking for.
 
 This repo addresses the following topics:
-* --- Build ---
+1. Build 
   * Build a JVM / Native app image with the Spring Boot plugin and GraalVM
   * Build a JVM / Native Docker image with Java and Java Native Paketo Buildpacks
 * CI/CD integration - Build a JVM / Native Docker image with kpack / Tanzu Build Service
-* --- Deploy ---
+2. Deploy 
   * Run locally / Kubernetes / Knative / Tanzu Serveless
-* ---Install Tanzu Serverless ---
-* --- Serverless use-cases: ---
+3. Install Tanzu Serverless 
+4. Serverless use-cases:
   * [x] Deployment of containers with the KNative(kn) CLI 
   * [x] Scale-to-zero, automatically
   * [x] Allow versioning of deployments and snapshots (deployed codes and configurations)
@@ -28,8 +28,8 @@ Build Options:
 * Native Application, leveraging GraalVM
 
 Supported Versions:
-* Spring Boot 2.4.1
-* Spring Native 0.8.5
+* Spring Boot 2.4.3
+* Spring Native 0.9.0 (Spring Native Beta)
 * OpenJDK version "11.0.10" 2021-01-19
 * OpenJDK 64-Bit Server VM GraalVM CE 21.0.0 (build 11.0.10+8-jvmci-21.0-b06, mixed mode, sharing)
 
@@ -161,10 +161,11 @@ $ kp image save hello-function-native \
     --tag <your-repo-prefix>/hello-function:native \ 
     --git https://github.com/ddobrin/spring-native-function-knative.git \
     --git-revision main \
-    --cluster-builder base \ 
+    --cluster-builder tiny \ 
+    --env BP_BOOT_NATIVE_IMAGE=1 \
     --env BP_JVM_VERSION=11 \
     --env BP_MAVEN_BUILD_ARGUMENTS="-Dmaven.test.skip=true package spring-boot:repackage" \
-    --env BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS="-Dspring.spel.ignore=true -Dspring.xml.ignore=true -Dspring.native.remove-yaml-support=true --enable-all-security-services"
+    --env BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS="-Dspring.spel.ignore=true -Dspring.xml.ignore=true -Dspring.native.remove-yaml-support=true --enable-all-security-services" \
     --wait 
 
 * tag - image tag
@@ -173,6 +174,7 @@ $ kp image save hello-function-native \
         --local-path ~/spring-native-function-knative
 * git-revision - the code branch in Git
 * cluster-builder - the Paketo builder used to build the image
+* BP_BOOT_NATIVE_IMAGE - set to true builds a Spring Native image
 * BP_JVM_VERSION - Java version to build for, accepts 8, 11
 * wait - if you wish to observe the build taking place
 * BP_MAVEN_BUILD_ARGUMENTS - kpack/TBS works declaratively in K8s, therefore requires instructions for the `repackaging` goal to be triggered; local machine is imperative and `package` in pom.xml is sufficient. 
