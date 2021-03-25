@@ -103,7 +103,7 @@ $ ./mvnw clean spring-boot:build-image
 $ ./mvnw clean spring-boot:build-image -Pjvm-image
 
 # start Docker image
-$ docker run -p 8080:8080 hello-function:jvm
+$ docker run -p 8080:8080 hello-function-jvm:0.0.1
 
 # test Docker image locally
 $ curl -w'\n' -H 'Content-Type: text/plain' localhost:8080 -d "from a Function"
@@ -115,7 +115,7 @@ $ curl -w'\n' -H 'Content-Type: text/plain' localhost:8080 -d "from a Function"
 $ ./mvnw clean spring-boot:build-image -Pnative-image
 
 # start Docker image
-$ docker run -p 8080:8080 hello-function:tiny
+$ docker run -p 8080:8080 hello-function-native:0.0.1
 
 # test Docker image locally
 $ curl -w'\n' -H 'Content-Type: text/plain' localhost:8080 -d "from a Function"
@@ -143,6 +143,7 @@ $ kp image save hello-function-jvm \
     --env BP_MAVEN_BUILD_ARGUMENTS="-Dmaven.test.skip=true package spring-boot:repackage" \
     --wait 
 
+* your-repo-prefix - prefix for your Container Registry. Ex. Docker-desktop hello-function:jvm, GCR gcr.io/pa-ddobrin/hello-function:jvm
 * tag - image tag
 * git - repo location 
 * local-path - to build from a local download of the repo, replace "git" with "local-path"
@@ -168,6 +169,7 @@ $ kp image save hello-function-native \
     --env BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS="-Dspring.spel.ignore=true -Dspring.xml.ignore=true -Dspring.native.remove-yaml-support=true --enable-all-security-services" \
     --wait 
 
+* your-repo-prefix - prefix for your Container Registry. Ex. Docker-desktop hello-function:native, GCR gcr.io/pa-ddobrin/hello-function:native 
 * tag - image tag
 * git - repo location 
 * local-path - to build from a local download of the repo, replace "git" with "local-path"
