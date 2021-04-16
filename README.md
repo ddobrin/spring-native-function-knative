@@ -1,6 +1,12 @@
 This sample app provides a simple `Hello` web app based on Spring Boot and Spring Cloud Functions.
 It provides multiple deployment options and common Knative use-cases which developers are looking for.
 
+`Currently Tracked Versions:`
+* Spring Boot 2.4.5 - April 15, 2021
+* Spring Native 0.9.2 (Spring Native Beta) - April 16, 2021
+* OpenJDK version "11.0.10"
+* OpenJDK 64-Bit Server VM GraalVM CE 21.0.0.2 (build 11.0.10+8-jvmci-21.0-b06, mixed mode, sharing)
+
 This repo addresses the following topics:
 1. Build 
   * Build a JVM / Native app image with the Spring Boot plugin and GraalVM
@@ -26,12 +32,6 @@ This repo addresses the following topics:
 Build Options:
 * JVM application, leveraging OpenJDK
 * Native Application, leveraging GraalVM
-
-Supported Versions:
-* Spring Boot 2.4.3
-* Spring Native 0.9.0 (Spring Native Beta)
-* OpenJDK version "11.0.10" 2021-01-19
-* OpenJDK 64-Bit Server VM GraalVM CE 21.0.0 (build 11.0.10+8-jvmci-21.0-b06, mixed mode, sharing)
 
 Deployment Models:
 * Standalone web app
