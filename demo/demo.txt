@@ -1,10 +1,10 @@
 # concurrency limit 1
 kn service create hello-function -n hello-function --image triathlonguy/hello-function:jvm --env TARGET="from Serverless Test - Spring Function on JVM" --revision-name hello-function-v1 --concurrency-limit 1 --autoscale-window 15s
 
-curl -w'\n' -H 'Content-Type: text/plain' http://hello-function.hello-function.35.184.97.2.xip.io -d "test"
+curl -w'\n' -H 'Content-Type: text/plain' http://hello-function.hello-function.35.184.97.2.sslip.io -d "test"
 
 #scale up
-siege -d1  -c10 -t1S  --content-type="text/plain" 'http://hello-function.hello-function.35.184.97.2.xip.io POST test'
+siege -d1  -c10 -t1S  --content-type="text/plain" 'http://hello-function.hello-function.35.184.97.2.sslip.io POST test'
 kn service delete hello-function -n hello-function
 
 # reset the service
@@ -18,13 +18,13 @@ kn service update hello-function -n hello-function --image triathlonguy/hello-fu
 
 # tag a revision
 kn service update hello-function -n hello-function  --tag hello-function-v2=candidate
-curl -w'\n' -H 'Content-Type: text/plain' http://candidate-hello-function.hello-function.35.184.97.2.xip.io -d "2nd-function"
+curl -w'\n' -H 'Content-Type: text/plain' http://candidate-hello-function.hello-function.35.184.97.2.sslip.io -d "2nd-function"
 ------------------
 # blue
 kn service update hello-function -n hello-function --image triathlonguy/hello-function:blue --env TARGET="from Serverless Test - from revision BLUE of Spring Function on JVM" --revision-name hello-function-blue --traffic @latest=100 --tag hello-function-blue=stable --concurrency-limit 25 --autoscale-window 15s
 
 # test blue
-curl -w'\n' -H 'Content-Type: text/plain' http://stable-hello-function.hello-function.35.184.97.2.xip.io -d "test"
+curl -w'\n' -H 'Content-Type: text/plain' http://stable-hello-function.hello-function.35.184.97.2.sslip.io -d "test"
 
 # housekeeping
 kn service update hello-function -n hello-function --untag candidate
@@ -63,7 +63,53 @@ kn service update hello-limits -n hello-function --limit cpu=450m,memory=1Gi
 
 # concurrency limit
 kn service update hello-limits -n hello-function --concurrency-limit 50
-siege  -c200 -t20S  --content-type="text/plain" 'http://hello-limits.hello-function.35.184.97.2.xip.io POST test'
+siege  -c200 -t20S  --content-type="text/plain" 'http://hello-limits.hello-function.35.184.97.2.sslip.io POST test'
 ------------------------
 # cleanup
 kn service delete hello-limits -n hello-function
+
+------------------------
+S&P demo
+
+kn service create hello-function -n hello-function --image triathlonguy/hello-function-jvm:0.0.1 --env TARGET="from Serverless Test - from revision JVM of Spring Function running on JVM" --revision-name hello-function-jvm 
+
+kn service update hello-function -n hello-function --image triathlonguy/hello-function-native:0.0.1 --env TARGET="from Serverless Test - from revision Native of Spring Function running as Native image" --revision-name hello-function-native --traffic @latest=20,hello-function-jvm=80 --tag hello-function-native=native
+
+kn revision list -s hello-function -n hello-function
+
+curl -w'\n' -H 'Content-Type: text/plain' http://hello-function.hello-function.35.184.97.2.sslip.io -d "test"
+curl -w'\n' -H 'Content-Type: text/plain' http://hello-function.hello-function.35.184.97.2.sslip.io -d "test"
+
+curl -w'\n' -H 'Content-Type: text/plain' http://native-hello-function.hello-function.35.184.97.2.sslip.io -d "test"
+
+curl -w'\n' -H 'Content-Type: text/plain' http://hello-function.hello-function.35.184.97.2.sslip.io -d "test"
+
+------------------------ 
+# Building native image
+kp image save hello-function-native --tag gcr.io/pa-ddobrin/hello-function-native:0.0.1 --git https://github.com/ddobrin/spring-native-function-knative.git --git-revision main --cluster-builder tiny --env BP_BOOT_NATIVE_IMAGE=1 --env BP_JVM_VERSION=11 --env BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS="-Dspring.spel.ignore=true -Dspring.xml.ignore=true -Dspring.native.remove-yaml-support=true --enable-all-security-services" --wait
+
+# building from local
+kp image save hello-function-jvm --tag gcr.io/pa-ddobrin/hello-function-jvm:blue --git https://github.com/ddobrin/spring-native-function-knative.git --git-revision main --cluster-builder base --env BP_JVM_VERSION=11 --wait 
+kp image save hello-function-jvm --tag gcr.io/pa-ddobrin/hello-function-jvm:blue --local-path /Users/dandobrin/work/serverless/spring-native-function-knative --cluster-builder base --env BP_JVM_VERSION=11 --wait 
+
+
+# building from local
+kp image save hello-function-native --tag gcr.io/pa-ddobrin/hello-function-native:green --git https://github.com/ddobrin/spring-native-function-knative.git --git-revision main --cluster-builder tiny --env BP_BOOT_NATIVE_IMAGE=1 --env BP_JVM_VERSION=11 --wait
+kp image save hello-function-native --tag gcr.io/pa-ddobrin/hello-function-native:green --local-path /Users/dandobrin/work/serverless/spring-native-function-knative --git-revision main --cluster-builder tiny --env BP_BOOT_NATIVE_IMAGE=1 --env BP_JVM_VERSION=11 --env BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS="-Dspring.spel.ignore=true -Dspring.xml.ignore=true -Dspring.native.remove-yaml-support=true --enable-all-security-services" --wait
+
+==
+TBS Build
+kp image save hello-function-jvm --tag gcr.io/pa-ddobrin/hello-function-jvm:blue --git https://github.com/ddobrin/spring-native-function-knative.git --git-revision main --cluster-builder base --env BP_JVM_VERSION=11 --env BP_MAVEN_BUILD_ARGUMENTS="-Dmaven.test.skip=true package spring-boot:repackage" --wait 
+
+kp image save hello-function-native --tag gcr.io/pa-ddobrin/hello-function-native:green --git https://github.com/ddobrin/spring-native-function-knative.git --git-revision main --cluster-builder tiny --env BP_BOOT_NATIVE_IMAGE=1 --env BP_JVM_VERSION=11 --env BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS="-Dspring.spel.ignore=true -Dspring.xml.ignore=true -Dspring.native.remove-yaml-support=true --enable-all-security-services" --env BP_MAVEN_BUILD_ARGUMENTS="-Dmaven.test.skip=true package spring-boot:repackage" --wait
+
+
+kp image save hello-function-native --tag gcr.io/pa-ddobrin/hello-function-native:green --local-path /Users/dandobrin/work/serverless/spring-native-function-knative --git-revision main --cluster-builder tiny --env BP_BOOT_NATIVE_IMAGE=1 --env BP_JVM_VERSION=11 --env BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS="-Dspring.spel.ignore=true -Dspring.xml.ignore=true -Dspring.native.remove-yaml-support=true --enable-all-security-services" --env BP_MAVEN_BUILD_ARGUMENTS="-Dmaven.test.skip=true package spring-boot:repackage" --wait
+==
+
+
+kn service create hello-function -n hello-function --image gcr.io/pa-ddobrin/hello-function-jvm:blue --env TARGET="from Serverless Test - Spring Function native" --revision-name hello-function-v1 --concurrency-limit 1 --autoscale-window 15s
+
+kn service create hello-function -n hello-function --image gcr.io/pa-ddobrin/hello-function-native:green --env TARGET="from Serverless Test - Spring Function Native" --revision-name hello-function-v1 --concurrency-limit 1 --autoscale-window 15s
+
+curl -w'\n' -H 'Content-Type: text/plain' http://hello-function.hello-function.35.184.97.2.sslip.io -d "test"

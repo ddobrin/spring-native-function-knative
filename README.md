@@ -2,11 +2,14 @@ This sample app provides a simple `Hello` web app based on Spring Boot and Sprin
 It provides multiple deployment options and common Knative use-cases which developers are looking for.
 
 `Currently Tracked Versions:`
-* Spring Boot 2.4.5 - April 15, 2021
-* Spring Native 0.9.2 (Spring Native Beta) - April 16, 2021
-* OpenJDK version "11.0.10"
-* OpenJDK 64-Bit Server VM GraalVM CE 21.0.0.2 (build 11.0.10+8-jvmci-21.0-b06, mixed mode, sharing)
-
+* Spring Boot 2.5.0 - May 2021
+* Spring Native 0.10.0 (Spring Native Beta) - June 2021
+* OpenJDK
+    * openjdk version "11.0.11" 2021-04-20
+* GraalVM CE
+    *  OpenJDK Runtime Environment GraalVM CE 21.1.0 (build 11.0.11+8-jvmci-21.1-b05)
+    *  OpenJDK 64-Bit Server VM GraalVM CE 21.1.0 (build 11.0.11+8-jvmci-21.1-b05, mixed mode, sharing)
+    
 This repo addresses the following topics:
 1. Build 
   * Build a JVM / Native app image with the Spring Boot plugin and GraalVM
@@ -82,7 +85,7 @@ $ curl -w'\n' -H 'Content-Type: text/plain' localhost:8080 -d "from a Function"
 ```bash 
 # switch to the GraalVM JDK for this build
 # ex, when using SDKman
-$ sdk use java 21.0.0.r11-grl
+$ sdk use java 21.1.0.r11-grl
 
 # build and run code using
 $ ./mvnw clean package -Pnative
