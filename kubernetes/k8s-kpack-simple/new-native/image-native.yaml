@@ -1,0 +1,34 @@
+---
+actions:
+  to: kubernetes/native/image-native.yaml
+---
+apiVersion: kpack.io/v1alpha1
+kind: Image
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: '{"kind":"Image","apiVersion":"kpack.io/v1alpha1","metadata":{"name":"hello-function-kpack-native","namespace":"default","creationTimestamp":null},"spec":{"tag":"gcr.io/pa-ddobrin/hello-function:native","builder":{"kind":"ClusterBuilder","name":"tiny"},"serviceAccount":"default","source":{"git":{"url":"https://github.com/ddobrin/spring-native-function-knative.git","revision":"main"}},"build":{"env":[{"name":"BP_BOOT_NATIVE_IMAGE","value":"1"},{"name":"BP_JVM_VERSION","value":"11"},{"name":"BP_MAVEN_BUILD_ARGUMENTS","value":"-Dmaven.test.skip=true package spring-boot:repackage"},{"name":"BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS","value":"-Dspring.spel.ignore=true -Dspring.xml.ignore=true -Dspring.native.remove-yaml-support=true --enable-all-security-services"}],"resources":{}}},"status":{}}'
+  creationTimestamp: null
+  name: {{artifactId}}-kpack-native
+  namespace: default
+spec:
+  build:
+    env:
+    - name: BP_BOOT_NATIVE_IMAGE
+      value: "1"
+    - name: BP_JVM_VERSION
+      value: "11"
+    - name: BP_MAVEN_BUILD_ARGUMENTS
+      value: -Dmaven.test.skip=true package spring-boot:repackage
+    - name: BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS
+      value: -Dspring.spel.ignore=true -Dspring.xml.ignore=true -Dspring.native.remove-yaml-support=true --enable-all-security-services
+    resources: {}
+  builder:
+    kind: ClusterBuilder
+    name: tiny
+  serviceAccount: default
+  source:
+    git:
+      revision: main
+      url: https://github.com/ddobrin/spring-native-function-knative.git
+  tag: {{artifactId}}-native:{{artifactVersion}}
+status: {}

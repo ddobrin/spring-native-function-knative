@@ -1,0 +1,28 @@
+accelerator:
+  displayName: Spring Cloud Function Serverless JVM/Native App on Knative
+  description: A simple Spring Cloud Function-based serverless app with JVM/GraalVM Native Image Compilation
+  iconUrl: https://raw.githubusercontent.com/simple-starters/icons/master/icon-tanzu-light.png
+  tags:
+    - spring
+    - cloud
+    - function
+    - native
+    - serverless
+  options:
+    - name: artifactId
+      label: Project Name
+      description: Knative function sample
+      required: true
+      dataType: string
+      inputType: text
+
+engine:
+  resources:
+    - name: specific-file
+      includes: ["kubernetes/k8s-kpack-simple/new/*.yaml"]
+      transformations:
+        replace:
+          - token: "{{artifactId}}"
+            with: "#artifactId"
+    - name: the-rest
+      includes: ["**"]

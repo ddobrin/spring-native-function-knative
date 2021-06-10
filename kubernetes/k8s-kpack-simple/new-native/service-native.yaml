@@ -1,0 +1,31 @@
+---
+actions:
+  to: kubernetes/native/service-native.yaml
+---
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: {{artifactId}}
+  namespace: {{artifactId}}
+spec:
+  template:
+    metadata:
+      annotations:
+        client.knative.dev/user-image: {{artifactId}}-native:{{artifactVersion}}
+      name: hello-function-v1
+    spec:
+      containerConcurrency: 10
+      containers:
+      - env:
+        - name: TARGET
+          value: From Native Serverless Test - Spring Function on GraalVM
+        image: {{artifactId}}-native:{{artifactVersion}}
+        name: user-container
+        readinessProbe:
+          successThreshold: 1
+          tcpSocket:
+            port: 0
+        resources: {}
+      enableServiceLinks: false
+      timeoutSeconds: 300
+status: {}
