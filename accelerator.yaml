@@ -6,15 +6,38 @@ accelerator:
     - spring
     - cloud
     - function
-    - native
     - serverless
+    - native
   options:
     - name: artifactId
       label: Project Name
-      description: Knative function sample
+      description: Knative function sample name
       required: true
       dataType: string
       inputType: text
+      # can I read this value from {{artifactId}} ?
+      defaultValue: hello-function
+      inputType: text
+    - name: deploymentType
+      inputType: select
+      choices:
+        none: Skip KNative or K8s deployment
+        kubernetes-resource-simple: Kubernetes Deployment and Service
+        knative-resource-simple: Knative Service Deployment
+        knative-kpack-resource-simple: Knative Service and Kpack Image
+        # knative-kustomize-skaffold:         
+    - name: includeKpackImage
+      label: Generate kpack file
+      description: include kpack image file
+      dataType: boolean
+      defaultValue: false
+      inputType: toggle
+    - name: includeKNativeService
+      label: Generate Knative Service YAML
+      description: include a Knative Service YAML
+      dataType: boolean
+      defaultValue: false
+      inputType: toggle 
 
 engine:
   resources:
