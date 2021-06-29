@@ -1,0 +1,28 @@
+
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: hello-function
+  namespace: hello-function
+spec:
+  template:
+    metadata:
+      annotations:
+        client.knative.dev/user-image: hello-function-jvm:1.0.0
+      name: hello-function-v1
+    spec:
+      containerConcurrency: 10
+      containers:
+      - env:
+        - name: TARGET
+          value: From Serverless Test - Spring Function on JVM
+        image: hello-function-jvm:1.0.0
+        name: user-container
+        readinessProbe:
+          successThreshold: 1
+          tcpSocket:
+            port: 0
+        resources: {}
+      enableServiceLinks: false
+      timeoutSeconds: 300
+status: {}

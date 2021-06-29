@@ -10,35 +10,26 @@ accelerator:
     - native
   options:
     - name: artifactId
-      label: Project Name
+      label: Artifact ID
       description: Knative function sample name
       required: true
       dataType: string
       inputType: text
-      # can I read this value from {{artifactId}} ?
       defaultValue: hello-function
       inputType: text
-    - name: DeploymentType
+    - name: deploymentType
       inputType: select
       description: Select the deployment model for your service
       choices:
-        none: Skip KNative or K8s deployment
+        none: Skip deployment configurations
         kubernetes-resource-simple: Kubernetes Deployment and Service
         knative-resource-simple: Knative Service Deployment
-        knative-kpack-resource-simple: Knative Service and Kpack Image
-        # knative-kustomize-skaffold:         
     - name: includeKpackImage
       label: Generate kpack file
       description: Include a kpack image YAML file
       dataType: boolean
       defaultValue: false
       inputType: toggle
-    - name: includeKNativeService
-      label: Generate a Knative Service deployment YAML file
-      description: Include a Knative Service YAML
-      dataType: boolean
-      defaultValue: false
-      inputType: toggle 
 
 engine:
   sources:
@@ -50,14 +41,17 @@ engine:
       substitutions:
       - text: hello-function
         with: "#artifactId"
-
-
-  resources:
-    - name: specific-file
-      includes: ["kubernetes/k8s-kpack-simple/new/*.yaml"]
-      transformations:
-        replace:
-          - token: "{{artifactId}}"
-            with: "#artifactId"
-    - name: the-rest
-      includes: ["**"]
+  - includes: ["kubernetes/kn/*/service*.yaml"]
+    condition: "#deploymentType == 'knative-resource-simple'"
+    transformations:
+    - type: ReplaceText
+      substitutions:
+      - text: "hello-function"
+        with: "#artifactId" 
+  - includes: ["kubernetes/kn/*/image*.yaml"]
+    condition: "#includeKpackImage"
+    transformations:
+    - type: ReplaceText
+      substitutions:
+      - text: "hello-function"
+        with: "#artifactId"
