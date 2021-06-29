@@ -78,7 +78,13 @@ engine:
       substitutions:
       - text: "registryPrefix"
         with: "#prefixContainerRegistryName" 
-
+  - includes: ["kubernetes/k8s/service.yaml", "kubernetes/k8s/deployment.yaml"]
+    condition: "#deploymentType == 'kubernetes-resource-simple'"
+    transformations:
+    - type: ReplaceText
+      substitutions:
+      - text: "registryPrefix"
+        with: "#prefixContainerRegistryName" 
 
 
 
