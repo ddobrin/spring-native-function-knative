@@ -18,8 +18,9 @@ accelerator:
       # can I read this value from {{artifactId}} ?
       defaultValue: hello-function
       inputType: text
-    - name: deploymentType
+    - name: DeploymentType
       inputType: select
+      description: Select the deployment model for your service
       choices:
         none: Skip KNative or K8s deployment
         kubernetes-resource-simple: Kubernetes Deployment and Service
@@ -28,18 +29,29 @@ accelerator:
         # knative-kustomize-skaffold:         
     - name: includeKpackImage
       label: Generate kpack file
-      description: include kpack image file
+      description: Include a kpack image YAML file
       dataType: boolean
       defaultValue: false
       inputType: toggle
     - name: includeKNativeService
-      label: Generate Knative Service YAML
-      description: include a Knative Service YAML
+      label: Generate a Knative Service deployment YAML file
+      description: Include a Knative Service YAML
       dataType: boolean
       defaultValue: false
       inputType: toggle 
 
 engine:
+  sources:
+  - includes: [ "**" ]
+    excludes: [ "kubernetes/**" ]
+  - includes: [ "pom.xml" ]
+    transformations:
+    - type: ReplaceText
+      substitutions:
+      - text: hello-function
+        with: "#artifactId"
+
+
   resources:
     - name: specific-file
       includes: ["kubernetes/k8s-kpack-simple/new/*.yaml"]
