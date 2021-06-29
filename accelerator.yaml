@@ -50,7 +50,7 @@ engine:
       - text: "hello-function"
         with: "#artifactId" 
   - includes: ["kubernetes/kn/*/image*.yaml"]
-    condition: "#includeKpackImage" && "#deploymentType == 'knative-resource-simple'"
+    condition: "#includeKpackImage and #deploymentType == 'knative-resource-simple'"
     transformations:
     - type: ReplaceText
       substitutions:
