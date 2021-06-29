@@ -16,7 +16,7 @@ spec:
       - env:
         - name: TARGET
           value: From Native Serverless Test - Spring Function on GraalVM
-        image: hello-function-native:latest
+        image: registryPrefix/hello-function-native:latest
         name: user-container
         readinessProbe:
           successThreshold: 1

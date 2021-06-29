@@ -16,7 +16,7 @@ spec:
       - env:
         - name: TARGET
           value: From Serverless Test - Spring Function on JVM
-        image: hello-function-jvm:latest
+        image: registryPrefix/hello-function-jvm:latest
         name: user-container
         readinessProbe:
           successThreshold: 1

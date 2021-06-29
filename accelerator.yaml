@@ -61,15 +61,6 @@ engine:
       substitutions:
       - text: "hello-function"
         with: "#artifactId"         
-  # - includes: [ "kubernetes/k8s/skaffold.yaml" ]
-  #     condition: "#deploymentType == 'kubernetes-resource-simple'"
-  #     transformations:
-  #     - type: ReplaceText
-  #       substitutions:
-  #       - text: "hello-function"
-  #         with: "#artifactId"
-  #     - type: RewritePath
-  #       rewriteTo: "#filename"        
   - includes: ["kubernetes/kn/*/image*.yaml"]
     condition: "#includeKpackImage"
     # logical operators for conditions
@@ -79,11 +70,24 @@ engine:
       substitutions:
       - text: "hello-function"
         with: "#artifactId"
-  - includes: ["kubernetes/*.yaml"]
-    condition: "#prefixContainerRegistryName"
+
+  - includes: ["kubernetes/kn/*/service*.yaml"]
+    condition: "#deploymentType == 'knative-resource-simple'"
     transformations:
     - type: ReplaceText
       substitutions:
-      - text: "image: "
+      - text: "registryPrefix"
         with: "#prefixContainerRegistryName" 
 
+
+
+
+  # - includes: [ "kubernetes/k8s/skaffold.yaml" ]
+  #     condition: "#deploymentType == 'kubernetes-resource-simple'"
+  #     transformations:
+  #     - type: ReplaceText
+  #       substitutions:
+  #       - text: "hello-function"
+  #         with: "#artifactId"
+  #     - type: RewritePath
+  #       rewriteTo: "#filename"        
