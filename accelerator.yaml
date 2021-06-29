@@ -49,22 +49,22 @@ engine:
       substitutions:
       - text: "hello-function"
         with: "#artifactId" 
-  - includes: ["kubernetes/k8s/*/service*.yaml", "kubernetes/k8s/*/deployment*.yaml"]
-    condition: "#deploymentType == 'kubernetes-resource-simple'"
-    transformations:
-    - type: ReplaceText
-      substitutions:
-      - text: "hello-function"
-        with: "#artifactId"         
-  - includes: [ "kubernetes/k8s/skaffold.yaml" ]
-      condition: "#deploymentType == 'kubernetes-resource-simple'"
-      transformations:
-      - type: ReplaceText
-        substitutions:
-        - text: "hello-function"
-          with: "#artifactId"
-      - type: RewritePath
-        rewriteTo: "#filename"        
+  # - includes: ["kubernetes/k8s/*/service*.yaml", "kubernetes/k8s/*/deployment*.yaml"]
+  #   condition: "#deploymentType == 'kubernetes-resource-simple'"
+  #   transformations:
+  #   - type: ReplaceText
+  #     substitutions:
+  #     - text: "hello-function"
+  #       with: "#artifactId"         
+  # - includes: [ "kubernetes/k8s/skaffold.yaml" ]
+  #     condition: "#deploymentType == 'kubernetes-resource-simple'"
+  #     transformations:
+  #     - type: ReplaceText
+  #       substitutions:
+  #       - text: "hello-function"
+  #         with: "#artifactId"
+  #     - type: RewritePath
+  #       rewriteTo: "#filename"        
   - includes: ["kubernetes/kn/*/image*.yaml"]
     condition: "#includeKpackImage"
     # logical operators for conditions
