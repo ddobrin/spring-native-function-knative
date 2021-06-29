@@ -25,7 +25,6 @@ accelerator:
         kubernetes-resource-simple: Kubernetes Deployment and Service
         knative-resource-simple: Knative Service Deployment
       defaultValue: none
-      required: false
     - name: includeKpackImage
       label: Generate kpack file
       description: Include a kpack image YAML file
