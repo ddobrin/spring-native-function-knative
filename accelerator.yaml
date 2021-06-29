@@ -24,7 +24,7 @@ accelerator:
         none: Skip deployment configurations
         kubernetes-resource-simple: Kubernetes Deployment and Service
         knative-resource-simple: Knative Service Deployment
-      # defaultValue: none
+      defaultValue: none
     - name: includeKpackImage
       label: Generate kpack file
       description: Include a kpack image YAML file
@@ -50,7 +50,9 @@ engine:
       - text: "hello-function"
         with: "#artifactId" 
   - includes: ["kubernetes/kn/*/image*.yaml"]
-    condition: "#includeKpackImage and #deploymentType == 'knative-resource-simple'"
+    condition: "#includeKpackImage"
+    # logical operators for conditions
+    # condition: "#includeKpackImage and #deploymentType == 'none'"
     transformations:
     - type: ReplaceText
       substitutions:
