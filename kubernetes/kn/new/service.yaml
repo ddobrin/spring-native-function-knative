@@ -8,7 +8,7 @@ spec:
   template:
     metadata:
       annotations:
-        client.knative.dev/user-image: hello-function-jvm:1.0.0
+        client.knative.dev/user-image: hello-function-jvm:latest
       name: hello-function-v1
     spec:
       containerConcurrency: 10
@@ -16,7 +16,7 @@ spec:
       - env:
         - name: TARGET
           value: From Serverless Test - Spring Function on JVM
-        image: hello-function-jvm:1.0.0
+        image: hello-function-jvm:latest
         name: user-container
         readinessProbe:
           successThreshold: 1
