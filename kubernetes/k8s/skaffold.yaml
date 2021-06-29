@@ -1,0 +1,12 @@
+apiVersion: skaffold/v2beta15
+kind: Config
+metadata:
+  name: hello-function
+build:
+  artifacts:
+  - image: hello-function
+deploy:
+  kubectl:
+    manifests:
+    - kubernetes/k8s/service.yaml
+    - kubernetes/k8s/deployment.yaml

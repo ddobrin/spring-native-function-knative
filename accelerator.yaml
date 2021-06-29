@@ -25,6 +25,7 @@ accelerator:
         kubernetes-resource-simple: Kubernetes Deployment and Service
         knative-resource-simple: Knative Service Deployment
       defaultValue: none
+      required: false
     - name: includeKpackImage
       label: Generate kpack file
       description: Include a kpack image YAML file
@@ -49,6 +50,22 @@ engine:
       substitutions:
       - text: "hello-function"
         with: "#artifactId" 
+  - includes: ["kubernetes/k8s/*/service*.yaml", "kubernetes/k8s/*/deployment*.yaml"]
+    condition: "#deploymentType == 'kubernetes-resource-simple'"
+    transformations:
+    - type: ReplaceText
+      substitutions:
+      - text: "hello-function"
+        with: "#artifactId"         
+  - includes: [ "kubernetes/k8s/skaffold.yaml" ]
+      condition: "#deploymentType == 'kubernetes-resource-simple'"
+      transformations:
+      - type: ReplaceText
+        substitutions:
+        - text: "hello-function"
+          with: "#artifactId"
+      - type: RewritePath
+        rewriteTo: "#filename"        
   - includes: ["kubernetes/kn/*/image*.yaml"]
     condition: "#includeKpackImage"
     # logical operators for conditions
