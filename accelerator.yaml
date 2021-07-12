@@ -20,9 +20,12 @@ accelerator:
       inputType: select
       description: Select the deployment model for your service
       choices:
-        none: Skip deployment configurations
-        kubernetes-resource-simple: Kubernetes Deployment and Service
-        knative-resource-simple: Knative Service Deployment
+      - value: none
+        text: Skip deployment configurations
+      - value: kubernetes-resource-simple 
+        text: Kubernetes Deployment and Service
+      - value: knative-resource-simple 
+        text: Knative Service Deployment
       defaultValue: none
     - name: includeKpackImage
       label: Generate kpack file
