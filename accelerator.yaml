@@ -59,57 +59,57 @@ accelerator:
 
 engine:
   merge:
-  - includes: [ "**" ]
-    excludes: [ "kubernetes/**" ]
-  - includes: [ "pom.xml" ]
-    transformations:
+  - include: [ "**" ]
+    exclude: [ "kubernetes/**" ]
+  - include: [ "pom.xml" ]
+    chain:
     - type: ReplaceText
       substitutions:
       - text: hello-function
         with: "#artifactId"
-  - includes: [ "pom.xml" ]
+  - include: [ "pom.xml" ]
     condition: "!(#activeProfiles.contains('jvm'))"
-    transformations:
+    chain:
     - type: ReplaceText
       substitutions:
       - text: <!--start-jvm-->
         with: <!--start-jvm
       - text: <!--end-jvm-->
         with: end-jvm-->
-  - includes: ["kubernetes/kn/*/service*.yaml"]
+  - include: ["kubernetes/kn/*/service*.yaml"]
     condition: "#deploymentType == 'knative-resource-simple'"
-    transformations:
+    chain:
     - type: ReplaceText
       substitutions:
       - text: "hello-function"
         with: "#artifactId" 
-  - includes: ["kubernetes/k8s/service.yaml", "kubernetes/k8s/deployment.yaml"]
+  - include: ["kubernetes/k8s/service.yaml", "kubernetes/k8s/deployment.yaml"]
     condition: "#deploymentType == 'kubernetes-resource-simple'"
-    transformations:
+    chain:
     - type: ReplaceText
       substitutions:
       - text: "hello-function"
         with: "#artifactId"         
-  - includes: ["kubernetes/kn/*/image*.yaml"]
+  - include: ["kubernetes/kn/*/image*.yaml"]
     condition: "#includeKpackImage"
     # logical operators for conditions
     # condition: "#includeKpackImage and #deploymentType == 'none'"
-    transformations:
+    chain:
     - type: ReplaceText
       substitutions:
       - text: "hello-function"
         with: "#artifactId"
 
-  - includes: ["kubernetes/kn/*/service*.yaml"]
+  - include: ["kubernetes/kn/*/service*.yaml"]
     condition: "#deploymentType == 'knative-resource-simple'"
-    transformations:
+    chain:
     - type: ReplaceText
       substitutions:
       - text: "registryPrefix"
         with: "#prefixContainerRegistryName" 
-  - includes: ["kubernetes/k8s/service.yaml", "kubernetes/k8s/deployment.yaml"]
+  - include: ["kubernetes/k8s/service.yaml", "kubernetes/k8s/deployment.yaml"]
     condition: "#deploymentType == 'kubernetes-resource-simple'"
-    transformations:
+    chain:
     - type: ReplaceText
       substitutions:
       - text: "registryPrefix"
