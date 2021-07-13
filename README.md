@@ -2,8 +2,8 @@ This sample app provides a simple `Hello` web app based on Spring Boot and Sprin
 It provides multiple deployment options and common Knative use-cases which developers are looking for.
 
 `Currently Tracked Versions:`
-* Spring Boot 2.5.0 - May 2021
-* Spring Native 0.10.0 (Spring Native Beta) - June 2021
+* Spring Boot 2.5.2 - as of June 2021
+* Spring Native 0.10.1 (Spring Native Beta) - as of June 20210
 * OpenJDK
     * openjdk version "11.0.11" 2021-04-20
 * GraalVM CE

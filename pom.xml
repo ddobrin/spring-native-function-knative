@@ -5,21 +5,22 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.0</version>
+        <version>2.5.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
     <artifactId>hello-function</artifactId>
-    <version>0.0.1</version>
+    <version>1.0.0</version>
     <name>spring-native-function-knative</name>
     <description>A simple example of a Function deployed in Knative, available as JVM or Native Image</description>
     <properties>
         <java.version>11</java.version>
 		<spring-cloud.version>2020.0.3</spring-cloud.version>
-        <spring-native.version>0.10.0-SNAPSHOT</spring-native.version>
+        <spring-native.version>0.10.1</spring-native.version>
+        <native-buildtools.version>0.9.1</native-buildtools.version>
+
         <jvm-image-type>jvm</jvm-image-type>
         <native-image-type>native</native-image-type>
-        <repository>docker.io/triathlonguy</repository>
     </properties>
     <dependencies>
         <dependency>
@@ -44,17 +45,22 @@
 
     </dependencies>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>${spring-cloud.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.experimental</groupId>
+                <artifactId>spring-native</artifactId>
+                <version>${spring-native.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
 <!--    <build>-->
 <!--        <plugins>-->
@@ -73,44 +79,98 @@
 <!--    </build>-->
 
     <!-- used for default build using the Spring Boot Maven Plugin -->
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.experimental</groupId>
-                <artifactId>spring-aot-maven-plugin</artifactId>
-                <version>${spring-native.version}</version>
-                <executions>
-                    <execution>
-                        <id>test-generate</id>
-                        <goals>
-                            <goal>test-generate</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>generate</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+<!--    <build>-->
+<!--        <plugins>-->
+<!--            <plugin>-->
+<!--                <groupId>org.springframework.boot</groupId>-->
+<!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
+<!--                <configuration>-->
+<!--                    <classifier>${repackage.classifier}</classifier>-->
+<!--                    <layers>-->
+<!--                        <enabled>true</enabled>-->
+<!--                    </layers>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+<!--            <plugin>-->
+<!--                <groupId>org.springframework.experimental</groupId>-->
+<!--                <artifactId>spring-aot-maven-plugin</artifactId>-->
+<!--                <version>${spring-native.version}</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>test-generate</id>-->
+<!--                        <goals>-->
+<!--                            <goal>test-generate</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                    <execution>-->
+<!--                        <id>generate</id>-->
+<!--                        <goals>-->
+<!--                            <goal>generate</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+<!--        </plugins>-->
+<!--    </build>-->
 
     <profiles>
-        <!-- this is the snippet that will use the buildpacks to produce a container image of the JVM executable -->
+        <!--start-jvm-->
         <profile>
-            <id>jvm-image</id>
+            <id>jvm</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
                         <configuration>
+                            <classifier>${repackage.classifier}</classifier>
+                            <layers>
+                                <enabled>true</enabled>
+                            </layers>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.springframework.experimental</groupId>
+                        <artifactId>spring-aot-maven-plugin</artifactId>
+                        <version>${spring-native.version}</version>
+                        <executions>
+                            <execution>
+                                <id>test-generate</id>
+                                <goals>
+                                    <goal>test-generate</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>generate</id>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <!--end-jvm-->
+        <!-- this is the snippet that will use the buildpacks to produce a container image of the JVM executable -->
+        <profile>
+            <id>jvm-image</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <configuration>
+                            <classifier>${repackage.classifier}</classifier>
+                            <layers>
+                                <enabled>true</enabled>
+                            </layers>
                             <image>
                                 <builder>paketobuildpacks/builder:base</builder>
                                 <name>${project.artifactId}-${jvm-image-type}:${project.version}</name>
@@ -156,17 +216,16 @@
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
                         <configuration>
+                            <classifier>${repackage.classifier}</classifier>
                             <image>
                                 <builder>paketobuildpacks/builder:tiny</builder>
                                 <name>${project.artifactId}-${native-image-type}:${project.version}</name>
-                                <env>   
+                                <env>
                                     <BP_BOOT_NATIVE_IMAGE>1</BP_BOOT_NATIVE_IMAGE>
                                     <BP_JVM_VERSION>11</BP_JVM_VERSION>
                                     <BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS>
-                                        -Dspring.spel.ignore=true
-                                        -Dspring.xml.ignore=true
-                                        -Dspring.native.remove-yaml-support=true
-                                        --enable-all-security-services
+                                        <removeSpelSupport>true</removeSpelSupport>
+                                        <removeYamlSupport>true</removeYamlSupport>
                                     </BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS>
                                 </env>
                             </image>
@@ -205,35 +264,44 @@
         <!-- this is the snippet that will invoke native-image during a regular maven build -->
         <profile>
             <id>native</id>
+            <properties>
+                <repackage.classifier>exec</repackage.classifier>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.graalvm.buildtools</groupId>
+                    <artifactId>junit-platform-native</artifactId>
+                    <version>${native-buildtools.version}</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.graalvm.nativeimage</groupId>
-                        <artifactId>native-image-maven-plugin</artifactId>
-                        <version>21.1.0</version>
-                        <configuration>
-                            <mainClass>com.example.hello.SpringNativeFunctionKnativeApplication</mainClass>
-                            <buildArgs>-Dspring.native.remove-yaml-support=true -Dspring.spel.ignore=true -Dspring.xml.ignore=true</buildArgs>
-                            <imageName>${project.artifactId}</imageName>
-                        </configuration>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <version>${native-buildtools.version}</version>
                         <executions>
                             <execution>
+                                <id>test-native</id>
+                                <phase>test</phase>
                                 <goals>
-                                    <goal>native-image</goal>
+                                    <goal>test</goal>
                                 </goals>
+                            </execution>
+                            <execution>
+                                <id>build-native</id>
                                 <phase>package</phase>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
                             </execution>
                         </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-maven-plugin</artifactId>
                     </plugin>
                 </plugins>
             </build>
         </profile>
     </profiles>
-
     <pluginRepositories>
         <pluginRepository>
             <id>spring-release</id>
