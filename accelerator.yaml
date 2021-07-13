@@ -33,7 +33,7 @@ accelerator:
         text: Spring Native App in lightweight Docker container
       defaultValue: ['jvm', 'native-image']
     - name: deploymentType
-      labeL: Deployment Model choices
+      label: Deployment Model choices
       inputType: select
       description: Select the deployment model for your service
       choices:
