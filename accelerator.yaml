@@ -18,6 +18,7 @@ accelerator:
       defaultValue: hello-function
     - name: activeProfiles
       label: Build Profile choices
+      description: Choose JVM and Native Build profiles
       inputType: checkbox
       dataType: [string]
       required: true
@@ -65,7 +66,7 @@ engine:
       - text: hello-function
         with: "#artifactId"
   - includes: [ "pom.xml" ]
-    condition: "!(#activeProfiles.contains('jvm'))"
+    condition: "#activeProfiles.contains('jvm')"
     - type: ReplaceText
       substitutions:
       - text: <!--start-jvm-->
