@@ -31,7 +31,7 @@ accelerator:
         text: Spring Native stand-alone app
       - value: native-image
         text: Spring Native App in lightweight Docker container
-      defaultValue: ['jvm', 'jvm-image']
+      defaultValue: ['jvm', 'native-image']
     - name: deploymentType
       labeL: Deployment Model choices
       inputType: select
@@ -94,6 +94,24 @@ engine:
               with: "'<!--start-jvm-image'"
             - text: '<!--end-jvm-image-->'
               with: "'end-jvm-image-->'"
+    - include: [ "pom.xml" ]
+      condition: "!(#activeProfiles.contains('native'))"
+      chain:
+        - type: ReplaceText
+          substitutions:
+            - text: '<!--start-native-->'
+              with: "'<!--start-native'"
+            - text: '<!--end-native-->'
+              with: "'end-native-->'"
+    - include: [ "pom.xml" ]
+      condition: "!(#activeProfiles.contains('native-image'))"
+      chain:
+        - type: ReplaceText
+          substitutions:
+            - text: '<!--start-native-image-->'
+              with: "'<!--start-native-image'"
+            - text: '<!--end-native-image-->'
+              with: "'end-native-image-->'"
 
     - include: ["kubernetes/kn/*/service*.yaml"]
       condition: "#deploymentType == 'knative-resource-simple'"
@@ -134,14 +152,3 @@ engine:
         - text: "registryPrefix"
           with: "#prefixContainerRegistryName"
 
-
-
-  # - includes: [ "kubernetes/k8s/skaffold.yaml" ]
-  #     condition: "#deploymentType == 'kubernetes-resource-simple'"
-  #     transformations:
-  #     - type: ReplaceText
-  #       substitutions:
-  #       - text: "hello-function"
-  #         with: "#artifactId"
-  #     - type: RewritePath
-  #       rewriteTo: "#filename"        

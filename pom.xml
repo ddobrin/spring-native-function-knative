@@ -177,6 +177,7 @@
         </profile>
         <!--end-jvm-image-->
         <!-- this is the snippet that will use the buildpacks to produce a container image of the Native executable -->
+        <!--start-native-image-->
         <profile>
             <id>native-image</id>
             <build>
@@ -230,7 +231,9 @@
                 </plugins>
             </build>
         </profile>
+        <!--end-native-image-->
         <!-- this is the snippet that will invoke native-image during a regular maven build -->
+        <!--start-native-->
         <profile>
             <id>native</id>
             <properties>
@@ -270,6 +273,7 @@
                 </plugins>
             </build>
         </profile>
+        <!--end-native-->
     </profiles>
     <pluginRepositories>
         <pluginRepository>
