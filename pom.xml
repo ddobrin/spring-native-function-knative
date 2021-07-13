@@ -78,42 +78,9 @@
 <!--        </plugins>-->
 <!--    </build>-->
 
-    <!-- used for default build using the Spring Boot Maven Plugin -->
-<!--    <build>-->
-<!--        <plugins>-->
-<!--            <plugin>-->
-<!--                <groupId>org.springframework.boot</groupId>-->
-<!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
-<!--                <configuration>-->
-<!--                    <classifier>${repackage.classifier}</classifier>-->
-<!--                    <layers>-->
-<!--                        <enabled>true</enabled>-->
-<!--                    </layers>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
-<!--            <plugin>-->
-<!--                <groupId>org.springframework.experimental</groupId>-->
-<!--                <artifactId>spring-aot-maven-plugin</artifactId>-->
-<!--                <version>${spring-native.version}</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>test-generate</id>-->
-<!--                        <goals>-->
-<!--                            <goal>test-generate</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                    <execution>-->
-<!--                        <id>generate</id>-->
-<!--                        <goals>-->
-<!--                            <goal>generate</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-<!--        </plugins>-->
-<!--    </build>-->
 
     <profiles>
+        <!-- used for default build using the Spring Boot Maven Plugin -->
         <!--start-jvm-->
         <profile>
             <id>jvm</id>
@@ -156,6 +123,7 @@
         </profile>
         <!--end-jvm-->
         <!-- this is the snippet that will use the buildpacks to produce a container image of the JVM executable -->
+        <!--start-jvm-image-->
         <profile>
             <id>jvm-image</id>
             <activation>
@@ -207,6 +175,7 @@
                 </plugins>
             </build>
         </profile>
+        <!--end-jvm-image-->
         <!-- this is the snippet that will use the buildpacks to produce a container image of the Native executable -->
         <profile>
             <id>native-image</id>

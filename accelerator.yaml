@@ -76,6 +76,25 @@ engine:
           with: "'<!--start-jvm'"
         - text: '<!--end-jvm-->'
           with: "'end-jvm-->'"
+    - include: [ "pom.xml" ]
+      condition: "!(#activeProfiles.contains('jvm'))"
+      chain:
+        - type: ReplaceText
+          substitutions:
+            - text: '<!--start-jvm-->'
+              with: "'<!--start-jvm'"
+            - text: '<!--end-jvm-->'
+              with: "'end-jvm-->'"
+    - include: [ "pom.xml" ]
+      condition: "!(#activeProfiles.contains('jvm-image'))"
+      chain:
+        - type: ReplaceText
+          substitutions:
+            - text: '<!--start-jvm-image-->'
+              with: "'<!--start-jvm-image'"
+            - text: '<!--end-jvm-image-->'
+              with: "'end-jvm-image-->'"
+
     - include: ["kubernetes/kn/*/service*.yaml"]
       condition: "#deploymentType == 'knative-resource-simple'"
       chain:
