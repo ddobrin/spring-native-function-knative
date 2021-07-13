@@ -73,9 +73,9 @@ engine:
       - type: ReplaceText
         substitutions:
         - text: '<!--start-jvm-->'
-          with: '<!--start-jvm'
+          with: "'<!--start-jvm'"
         - text: '<!--end-jvm-->'
-          with: 'end-jvm-->'
+          with: "'end-jvm-->'"
     - include: ["kubernetes/kn/*/service*.yaml"]
       condition: "#deploymentType == 'knative-resource-simple'"
       chain:
