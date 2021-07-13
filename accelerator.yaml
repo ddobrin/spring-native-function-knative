@@ -17,6 +17,7 @@ accelerator:
       inputType: text
       defaultValue: hello-function
     - name: activeProfiles
+      label: Build Profile choices
       inputType: checkbox
       dataType: [string]
       required: true
