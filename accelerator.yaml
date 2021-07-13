@@ -66,7 +66,8 @@ engine:
       - text: hello-function
         with: "#artifactId"
   - includes: [ "pom.xml" ]
-    condition: "#activeProfiles.contains('jvm')"
+    condition: "!(#activeProfiles.contains('jvm'))"
+    transformations:
     - type: ReplaceText
       substitutions:
       - text: <!--start-jvm-->
