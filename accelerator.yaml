@@ -33,6 +33,7 @@ accelerator:
         text: Spring Native App in lightweight Docker container
       defaultValue: jvm
     - name: deploymentType
+      labeL: Deployment Model choices
       inputType: select
       description: Select the deployment model for your service
       choices:
@@ -50,14 +51,14 @@ accelerator:
       defaultValue: false
       inputType: toggle
     - name: prefixContainerRegistryName
-      label: Container Registry Prefix
+      label: Registry Prefix
       description: Container Registry prefix, ex. gcr.io/project-name
       dataType: string
       inputType: text
       defaultValue: docker.io/triathlonguy/
 
 engine:
-  sources:
+  merge:
   - includes: [ "**" ]
     excludes: [ "kubernetes/**" ]
   - includes: [ "pom.xml" ]
