@@ -45,6 +45,12 @@ accelerator:
       - value: knative-resource-simple 
         text: Knative Service Deployment
       defaultValue: none
+    - name: includeSkaffold
+      label: Generate Skaffold file
+      description: Include a Skaffold image YAML file for K8s deployment
+      dataType: boolean
+      defaultValue: false
+      inputType: toggle
     - name: includeKpackImage
       label: Generate kpack file
       description: Include a kpack image YAML file
@@ -128,6 +134,13 @@ engine:
         substitutions:
         - text: "hello-function"
           with: "#artifactId"
+    - include: ["kubernetes/k8s/*/skaffold*.yaml"]
+      condition: "#deploymentType == 'includeSkaffold'"
+      chain:
+        - type: ReplaceText
+          substitutions:
+            - text: "hello-function"
+              with: "#artifactId"
     - include: ["kubernetes/kpack/*/image*.yaml"]
       condition: "#includeKpackImage"
       # logical operators for conditions

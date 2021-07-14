@@ -141,7 +141,7 @@
                             </layers>
                             <image>
                                 <builder>paketobuildpacks/builder:base</builder>
-                                <name>${project.artifactId}-${jvm-image-type}:${project.version}</name>
+                                <name>${project.artifactId}-${jvm-image-type}:latest</name>
                             </image>
                         </configuration>
                         <executions>
@@ -189,7 +189,7 @@
                             <classifier>${repackage.classifier}</classifier>
                             <image>
                                 <builder>paketobuildpacks/builder:tiny</builder>
-                                <name>${project.artifactId}-${native-image-type}:${project.version}</name>
+                                <name>${project.artifactId}-${native-image-type}:latest</name>
                                 <env>
                                     <BP_BOOT_NATIVE_IMAGE>1</BP_BOOT_NATIVE_IMAGE>
                                     <BP_JVM_VERSION>11</BP_JVM_VERSION>
