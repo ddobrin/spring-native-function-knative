@@ -121,7 +121,7 @@ engine:
         substitutions:
         - text: "hello-function"
           with: "#artifactId"
-    - include: ["kubernetes/k8s/*/service.yaml", "kubernetes/k8s/*/deployment.yaml"]
+    - include: ["kubernetes/k8s/*/service*.yaml", "kubernetes/k8s/*/deployment*.yaml"]
       condition: "#deploymentType == 'kubernetes-resource-simple'"
       chain:
       - type: ReplaceText
@@ -144,7 +144,7 @@ engine:
         substitutions:
         - text: "registryPrefix"
           with: "#prefixContainerRegistryName"
-    - include: ["kubernetes/k8s/*/service.yaml", "kubernetes/k8s/*/deployment.yaml"]
+    - include: ["kubernetes/k8s/*/service*.yaml", "kubernetes/k8s/*/deployment*.yaml"]
       condition: "#deploymentType == 'kubernetes-resource-simple'"
       chain:
       - type: ReplaceText
