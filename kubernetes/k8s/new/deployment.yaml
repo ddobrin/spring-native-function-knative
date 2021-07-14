@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: hello-function
+  name: hello-function-jvm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hello-function
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hello-function
+        app.kubernetes.io/part-of: hello-function
+    spec:
+      containers:
+      - image: registryPrefix/hello-function-jvm:latest
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /actuator/info
+            port: 8080
+        name: app
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080

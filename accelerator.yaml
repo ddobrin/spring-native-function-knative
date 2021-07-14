@@ -17,7 +17,7 @@ accelerator:
       inputType: text
       defaultValue: hello-function
     - name: activeProfiles
-      label: Build Profile choices
+      label: Build Profile Choices
       description: Choose JVM and Native Build profiles
       inputType: checkbox
       dataType: [string]
@@ -33,7 +33,8 @@ accelerator:
         text: Spring Native App in lightweight Docker container
       defaultValue: ['jvm', 'native-image']
     - name: deploymentType
-      label: Deployment Model choices
+      label: Deployment Choices
+      display: true
       inputType: select
       description: Select the deployment model for your service
       choices:
@@ -120,14 +121,14 @@ engine:
         substitutions:
         - text: "hello-function"
           with: "#artifactId"
-    - include: ["kubernetes/k8s/service.yaml", "kubernetes/k8s/deployment.yaml"]
+    - include: ["kubernetes/k8s/*/service.yaml", "kubernetes/k8s/*/deployment.yaml"]
       condition: "#deploymentType == 'kubernetes-resource-simple'"
       chain:
       - type: ReplaceText
         substitutions:
         - text: "hello-function"
           with: "#artifactId"
-    - include: ["kubernetes/kn/*/image*.yaml"]
+    - include: ["kubernetes/kpack/*/image*.yaml"]
       condition: "#includeKpackImage"
       # logical operators for conditions
       # condition: "#includeKpackImage and #deploymentType == 'none'"
@@ -136,7 +137,6 @@ engine:
         substitutions:
         - text: "hello-function"
           with: "#artifactId"
-
     - include: ["kubernetes/kn/*/service*.yaml"]
       condition: "#deploymentType == 'knative-resource-simple'"
       chain:
@@ -144,7 +144,7 @@ engine:
         substitutions:
         - text: "registryPrefix"
           with: "#prefixContainerRegistryName"
-    - include: ["kubernetes/k8s/service.yaml", "kubernetes/k8s/deployment.yaml"]
+    - include: ["kubernetes/k8s/*/service.yaml", "kubernetes/k8s/*/deployment.yaml"]
       condition: "#deploymentType == 'kubernetes-resource-simple'"
       chain:
       - type: ReplaceText
