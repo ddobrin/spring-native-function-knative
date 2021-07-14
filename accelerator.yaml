@@ -62,7 +62,7 @@ accelerator:
       description: Container Registry prefix, ex. gcr.io/project-name
       dataType: string
       inputType: text
-      defaultValue: docker.io/triathlonguy/
+      defaultValue: docker.io/triathlonguy
 
 engine:
   merge:
@@ -135,7 +135,7 @@ engine:
         - text: "hello-function"
           with: "#artifactId"
     - include: ["kubernetes/k8s/*/skaffold*.yaml"]
-      condition: "#deploymentType == 'includeSkaffold'"
+      condition: "#includeSkaffold"
       chain:
         - type: ReplaceText
           substitutions:
