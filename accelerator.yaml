@@ -1,0 +1,167 @@
+accelerator:
+  displayName: Spring Cloud Function Serverless JVM/Native App on Knative
+  description: A simple Spring Cloud Function-based serverless app with JVM/GraalVM Native Image Compilation
+  iconUrl: https://raw.githubusercontent.com/simple-starters/icons/master/icon-tanzu-light.png
+  tags:
+    - spring
+    - cloud
+    - function
+    - serverless
+    - native
+  options:
+    - name: artifactId
+      label: Artifact ID
+      description: Knative function sample name
+      required: true
+      dataType: string
+      inputType: text
+      defaultValue: hello-function
+    - name: activeProfiles
+      label: Build Profile Choices
+      description: Choose JVM and Native Build profiles
+      inputType: checkbox
+      dataType: [string]
+      required: true
+      choices:
+      - value: jvm
+        text: JVM stand-alone app
+      - value: jvm-image
+        text: JVM App in lightweight Docker container
+      - value: native
+        text: Spring Native stand-alone app
+      - value: native-image
+        text: Spring Native App in lightweight Docker container
+      defaultValue: ['jvm', 'native-image']
+    - name: deploymentType
+      label: Deployment Choices
+      display: true
+      inputType: select
+      description: Select the deployment model for your service
+      choices:
+      - value: none
+        text: Skip deployment configurations
+      - value: kubernetes-resource-simple 
+        text: Kubernetes Deployment and Service
+      - value: knative-resource-simple 
+        text: Knative Service Deployment
+      defaultValue: none
+    - name: includeSkaffold
+      label: Generate Skaffold file
+      description: Include a Skaffold image YAML file for K8s deployment
+      dataType: boolean
+      defaultValue: false
+      inputType: toggle
+    - name: includeKpackImage
+      label: Generate kpack file
+      description: Include a kpack image YAML file
+      dataType: boolean
+      defaultValue: false
+      inputType: toggle
+    - name: prefixContainerRegistryName
+      label: Registry Prefix
+      description: Container Registry prefix, ex. gcr.io/project-name
+      dataType: string
+      inputType: text
+      defaultValue: docker.io/triathlonguy
+
+engine:
+  merge:
+    - include: [ "**" ]
+      exclude: [ "kubernetes/**" ]
+    - include: [ "pom.xml" ]
+      chain:
+      - type: ReplaceText
+        substitutions:
+        - text: hello-function
+          with: "#artifactId"
+    - include: [ "pom.xml" ]
+      condition: "!(#activeProfiles.contains('jvm'))"
+      chain:
+      - type: ReplaceText
+        substitutions:
+        - text: '<!--start-jvm-->'
+          with: "'<!--start-jvm'"
+        - text: '<!--end-jvm-->'
+          with: "'end-jvm-->'"
+    - include: [ "pom.xml" ]
+      condition: "!(#activeProfiles.contains('jvm'))"
+      chain:
+        - type: ReplaceText
+          substitutions:
+            - text: '<!--start-jvm-->'
+              with: "'<!--start-jvm'"
+            - text: '<!--end-jvm-->'
+              with: "'end-jvm-->'"
+    - include: [ "pom.xml" ]
+      condition: "!(#activeProfiles.contains('jvm-image'))"
+      chain:
+        - type: ReplaceText
+          substitutions:
+            - text: '<!--start-jvm-image-->'
+              with: "'<!--start-jvm-image'"
+            - text: '<!--end-jvm-image-->'
+              with: "'end-jvm-image-->'"
+    - include: [ "pom.xml" ]
+      condition: "!(#activeProfiles.contains('native'))"
+      chain:
+        - type: ReplaceText
+          substitutions:
+            - text: '<!--start-native-->'
+              with: "'<!--start-native'"
+            - text: '<!--end-native-->'
+              with: "'end-native-->'"
+    - include: [ "pom.xml" ]
+      condition: "!(#activeProfiles.contains('native-image'))"
+      chain:
+        - type: ReplaceText
+          substitutions:
+            - text: '<!--start-native-image-->'
+              with: "'<!--start-native-image'"
+            - text: '<!--end-native-image-->'
+              with: "'end-native-image-->'"
+
+    - include: ["kubernetes/kn/*/service*.yaml"]
+      condition: "#deploymentType == 'knative-resource-simple'"
+      chain:
+      - type: ReplaceText
+        substitutions:
+        - text: "hello-function"
+          with: "#artifactId"
+    - include: ["kubernetes/k8s/*/service*.yaml", "kubernetes/k8s/*/deployment*.yaml"]
+      condition: "#deploymentType == 'kubernetes-resource-simple'"
+      chain:
+      - type: ReplaceText
+        substitutions:
+        - text: "hello-function"
+          with: "#artifactId"
+    - include: ["kubernetes/k8s/*/skaffold*.yaml"]
+      condition: "#includeSkaffold"
+      chain:
+        - type: ReplaceText
+          substitutions:
+            - text: "hello-function"
+              with: "#artifactId"
+    - include: ["kubernetes/kpack/*/image*.yaml"]
+      condition: "#includeKpackImage"
+      # logical operators for conditions
+      # condition: "#includeKpackImage and #deploymentType == 'none'"
+      chain:
+      - type: ReplaceText
+        substitutions:
+        - text: "hello-function"
+          with: "#artifactId"
+    - include: ["kubernetes/kn/*/service*.yaml"]
+      condition: "#deploymentType == 'knative-resource-simple'"
+      chain:
+      - type: ReplaceText
+        substitutions:
+        - text: "registryPrefix"
+          with: "#prefixContainerRegistryName"
+    - include: ["kubernetes/k8s/*/service*.yaml", "kubernetes/k8s/*/deployment*.yaml"]
+      condition: "#deploymentType == 'kubernetes-resource-simple'"
+      chain:
+      - type: ReplaceText
+        substitutions:
+        - text: "registryPrefix"
+          with: "#prefixContainerRegistryName"
+

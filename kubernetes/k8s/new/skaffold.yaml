@@ -1,0 +1,29 @@
+apiVersion: skaffold/v2beta15
+kind: Config
+metadata:
+  name: hello-function
+build:
+  tagPolicy:
+    sha256: {}
+  artifacts:
+    - image: hello-function-jvm
+      custom:
+        buildCommand: ./mvnw spring-boot:build-image -DskipTests -Pjvm-image -Dspring-boot.build-image.imageName=$IMAGE
+        dependencies:
+          paths:
+            - src
+            - pom.xml
+deploy:
+  kubectl:
+    manifests:
+      - kubernetes/k8s/new/service.yaml
+      - kubernetes/k8s/new/deployment.yaml
+portForward:
+  - resourceType: service
+    resourceName: hello-function
+    localPort: 8080
+profiles:
+  - name: local
+    build:
+      local:
+        push: false
