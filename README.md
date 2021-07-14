@@ -106,7 +106,7 @@ $ ./mvnw clean spring-boot:build-image
 $ ./mvnw clean spring-boot:build-image -Pjvm-image
 
 # start Docker image
-$ docker run -p 8080:8080 hello-function-jvm:0.0.1
+$ docker run -p 8080:8080 hello-function-jvm:latest
 
 # test Docker image locally
 $ curl -w'\n' -H 'Content-Type: text/plain' localhost:8080 -d "from a Function"
@@ -118,7 +118,7 @@ $ curl -w'\n' -H 'Content-Type: text/plain' localhost:8080 -d "from a Function"
 $ ./mvnw clean spring-boot:build-image -Pnative-image
 
 # start Docker image
-$ docker run -p 8080:8080 hello-function-native:0.0.1
+$ docker run -p 8080:8080 hello-function-native:latest
 
 # test Docker image locally
 $ curl -w'\n' -H 'Content-Type: text/plain' localhost:8080 -d "from a Function"
