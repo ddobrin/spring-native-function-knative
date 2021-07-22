@@ -15,10 +15,10 @@
     <description>A simple example of a Function deployed in Knative, available as JVM or Native Image</description>
     <properties>
         <java.version>11</java.version>
-		<spring-cloud.version>2020.0.3</spring-cloud.version>
+        <spring-cloud.version>2020.0.3</spring-cloud.version>
         <spring-native.version>0.10.1</spring-native.version>
         <native-buildtools.version>0.9.1</native-buildtools.version>
-
+        <repackage.classifier/>
         <jvm-image-type>jvm</jvm-image-type>
         <native-image-type>native</native-image-type>
     </properties>
@@ -62,73 +62,41 @@
         </dependencies>
     </dependencyManagement>
 
-<!--    <build>-->
-<!--        <plugins>-->
-<!--            <plugin>-->
-<!--                <groupId>org.springframework.boot</groupId>-->
-<!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <goals>-->
-<!--                            <goal>repackage</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-<!--        </plugins>-->
-<!--    </build>-->
-
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <classifier>${repackage.classifier}</classifier>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.experimental</groupId>
+                <artifactId>spring-aot-maven-plugin</artifactId>
+                <version>${spring-native.version}</version>
+                <executions>
+                    <execution>
+                        <id>test-generate</id>
+                        <goals>
+                            <goal>test-generate</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>generate</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
     <profiles>
-        <!-- used for default build using the Spring Boot Maven Plugin -->
-        <!--start-jvm-->
-        <profile>
-            <id>jvm</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-maven-plugin</artifactId>
-                        <configuration>
-                            <classifier>${repackage.classifier}</classifier>
-                            <layers>
-                                <enabled>true</enabled>
-                            </layers>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.springframework.experimental</groupId>
-                        <artifactId>spring-aot-maven-plugin</artifactId>
-                        <version>${spring-native.version}</version>
-                        <executions>
-                            <execution>
-                                <id>test-generate</id>
-                                <goals>
-                                    <goal>test-generate</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>generate</id>
-                                <goals>
-                                    <goal>generate</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <!--end-jvm-->
-        <!-- this is the snippet that will use the buildpacks to produce a container image of the JVM executable -->
-        <!--start-jvm-image-->
+        <!-- this is the profile that will use the buildpacks to produce a container image of the JVM executable -->
         <profile>
             <id>jvm-image</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
             <build>
                 <plugins>
                     <plugin>
@@ -175,9 +143,7 @@
                 </plugins>
             </build>
         </profile>
-        <!--end-jvm-image-->
-        <!-- this is the snippet that will use the buildpacks to produce a container image of the Native executable -->
-        <!--start-native-image-->
+        <!-- this is the profile that will use the buildpacks to produce a container image of the Native executable -->
         <profile>
             <id>native-image</id>
             <build>
@@ -231,9 +197,7 @@
                 </plugins>
             </build>
         </profile>
-        <!--end-native-image-->
-        <!-- this is the snippet that will invoke native-image during a regular maven build -->
-        <!--start-native-->
+        <!-- this is the profile that will invoke native-image during a regular maven build -->
         <profile>
             <id>native</id>
             <properties>
@@ -273,8 +237,8 @@
                 </plugins>
             </build>
         </profile>
-        <!--end-native-->
     </profiles>
+
     <pluginRepositories>
         <pluginRepository>
             <id>spring-release</id>
@@ -283,22 +247,6 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-        </pluginRepository>
-        <pluginRepository>
-            <id>spring-milestone</id>
-            <name>Spring milestone</name>
-            <url>https://repo.spring.io/milestone</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </pluginRepository>
-        <pluginRepository>
-            <id>spring-snapshot</id>
-            <name>Spring Snapshots</name>
-            <url>https://repo.spring.io/snapshot</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
         </pluginRepository>
     </pluginRepositories>
     <repositories>
@@ -310,37 +258,6 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-        <repository>
-            <id>spring-milestone</id>
-            <name>Spring milestone</name>
-            <url>https://repo.spring.io/milestone</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>spring-snapshot</id>
-            <name>Spring Snapshots</name>
-            <url>https://repo.spring.io/snapshot</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
     </repositories>
-
-<!--    <repositories>-->
-<!--        <repository>-->
-<!--            <id>spring-releases</id>-->
-<!--            <name>Spring Releases</name>-->
-<!--            <url>https://repo.spring.io/release</url>-->
-<!--        </repository>-->
-<!--    </repositories>-->
-<!--    <pluginRepositories>-->
-<!--        <pluginRepository>-->
-<!--            <id>spring-releases</id>-->
-<!--            <name>Spring Releases</name>-->
-<!--            <url>https://repo.spring.io/release</url>-->
-<!--        </pluginRepository>-->
-<!--    </pluginRepositories>-->
 
 </project>

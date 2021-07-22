@@ -16,22 +16,6 @@ accelerator:
       dataType: string
       inputType: text
       defaultValue: hello-function
-    - name: activeProfiles
-      label: Build Profile Choices
-      description: Choose JVM and Native Build profiles
-      inputType: checkbox
-      dataType: [string]
-      required: true
-      choices:
-      - value: jvm
-        text: JVM stand-alone app
-      - value: jvm-image
-        text: JVM App in lightweight Docker container
-      - value: native
-        text: Spring Native stand-alone app
-      - value: native-image
-        text: Spring Native App in lightweight Docker container
-      defaultValue: ['jvm', 'native-image']
     - name: deploymentType
       label: Deployment Choices
       display: true
@@ -74,52 +58,6 @@ engine:
         substitutions:
         - text: hello-function
           with: "#artifactId"
-    - include: [ "pom.xml" ]
-      condition: "!(#activeProfiles.contains('jvm'))"
-      chain:
-      - type: ReplaceText
-        substitutions:
-        - text: '<!--start-jvm-->'
-          with: "'<!--start-jvm'"
-        - text: '<!--end-jvm-->'
-          with: "'end-jvm-->'"
-    - include: [ "pom.xml" ]
-      condition: "!(#activeProfiles.contains('jvm'))"
-      chain:
-        - type: ReplaceText
-          substitutions:
-            - text: '<!--start-jvm-->'
-              with: "'<!--start-jvm'"
-            - text: '<!--end-jvm-->'
-              with: "'end-jvm-->'"
-    - include: [ "pom.xml" ]
-      condition: "!(#activeProfiles.contains('jvm-image'))"
-      chain:
-        - type: ReplaceText
-          substitutions:
-            - text: '<!--start-jvm-image-->'
-              with: "'<!--start-jvm-image'"
-            - text: '<!--end-jvm-image-->'
-              with: "'end-jvm-image-->'"
-    - include: [ "pom.xml" ]
-      condition: "!(#activeProfiles.contains('native'))"
-      chain:
-        - type: ReplaceText
-          substitutions:
-            - text: '<!--start-native-->'
-              with: "'<!--start-native'"
-            - text: '<!--end-native-->'
-              with: "'end-native-->'"
-    - include: [ "pom.xml" ]
-      condition: "!(#activeProfiles.contains('native-image'))"
-      chain:
-        - type: ReplaceText
-          substitutions:
-            - text: '<!--start-native-image-->'
-              with: "'<!--start-native-image'"
-            - text: '<!--end-native-image-->'
-              with: "'end-native-image-->'"
-
     - include: ["kubernetes/kn/*/service*.yaml"]
       condition: "#deploymentType == 'knative-resource-simple'"
       chain:
@@ -164,4 +102,3 @@ engine:
         substitutions:
         - text: "registryPrefix"
           with: "#prefixContainerRegistryName"
-
