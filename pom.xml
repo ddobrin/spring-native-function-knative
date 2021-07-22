@@ -21,6 +21,7 @@
 
         <jvm-image-type>jvm</jvm-image-type>
         <native-image-type>native</native-image-type>
+        <repackage.classifier/>
     </properties>
     <dependencies>
         <dependency>
@@ -45,48 +46,48 @@
 
     </dependencies>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <classifier>${repackage.classifier}</classifier>
+                    <layers>
+                        <enabled>true</enabled>
+                    </layers>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.springframework.experimental</groupId>
-                <artifactId>spring-native</artifactId>
+                <artifactId>spring-aot-maven-plugin</artifactId>
                 <version>${spring-native.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
-<!--    <build>-->
-<!--        <plugins>-->
-<!--            <plugin>-->
-<!--                <groupId>org.springframework.boot</groupId>-->
-<!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <goals>-->
-<!--                            <goal>repackage</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-<!--        </plugins>-->
-<!--    </build>-->
-
+                <executions>
+                    <execution>
+                        <id>test-generate</id>
+                        <goals>
+                            <goal>test-generate</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>generate</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
     <profiles>
         <!-- used for default build using the Spring Boot Maven Plugin -->
         <!--start-jvm-->
         <profile>
             <id>jvm</id>
-            <activation>
+            <!-- <activation>
                 <activeByDefault>true</activeByDefault>
-            </activation>
+            </activation> -->
             <build>
                 <plugins>
                     <plugin>
@@ -126,9 +127,9 @@
         <!--start-jvm-image-->
         <profile>
             <id>jvm-image</id>
-            <activation>
+            <!-- <activation>
                 <activeByDefault>false</activeByDefault>
-            </activation>
+            </activation> -->
             <build>
                 <plugins>
                     <plugin>
@@ -328,19 +329,20 @@
         </repository>
     </repositories>
 
-<!--    <repositories>-->
-<!--        <repository>-->
-<!--            <id>spring-releases</id>-->
-<!--            <name>Spring Releases</name>-->
-<!--            <url>https://repo.spring.io/release</url>-->
-<!--        </repository>-->
-<!--    </repositories>-->
-<!--    <pluginRepositories>-->
-<!--        <pluginRepository>-->
-<!--            <id>spring-releases</id>-->
-<!--            <name>Spring Releases</name>-->
-<!--            <url>https://repo.spring.io/release</url>-->
-<!--        </pluginRepository>-->
-<!--    </pluginRepositories>-->
-
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.experimental</groupId>
+                <artifactId>spring-native</artifactId>
+                <version>${spring-native.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
