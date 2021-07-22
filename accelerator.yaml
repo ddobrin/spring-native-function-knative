@@ -84,15 +84,6 @@ engine:
         - text: '<!--end-jvm-->'
           with: "'end-jvm-->'"
     - include: [ "pom.xml" ]
-      condition: "!(#activeProfiles.contains('jvm'))"
-      chain:
-        - type: ReplaceText
-          substitutions:
-            - text: '<!--start-jvm-->'
-              with: "'<!--start-jvm'"
-            - text: '<!--end-jvm-->'
-              with: "'end-jvm-->'"
-    - include: [ "pom.xml" ]
       condition: "!(#activeProfiles.contains('jvm-image'))"
       chain:
         - type: ReplaceText

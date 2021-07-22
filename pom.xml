@@ -85,9 +85,6 @@
         <!--start-jvm-->
         <profile>
             <id>jvm</id>
-            <!-- <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation> -->
             <build>
                 <plugins>
                     <plugin>
@@ -127,9 +124,6 @@
         <!--start-jvm-image-->
         <profile>
             <id>jvm-image</id>
-            <!-- <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation> -->
             <build>
                 <plugins>
                     <plugin>
