@@ -75,8 +75,7 @@ engine:
           substitutions:
           - text: hello-function
             with: "#artifactId"
-      - include: [ "pom.xml" ]
-        condition: "!(#activeProfiles.contains('jvm'))"
+      - condition: "!(#activeProfiles.contains('jvm'))"
         chain:
         - type: ReplaceText
           substitutions:
@@ -84,8 +83,7 @@ engine:
             with: "'<!--start-jvm'"
           - text: '<!--end-jvm-->'
             with: "'end-jvm-->'"
-      - include: [ "pom.xml" ]
-        condition: "!(#activeProfiles.contains('jvm-image'))"
+      - condition: "!(#activeProfiles.contains('jvm-image'))"
         chain:
           - type: ReplaceText
             substitutions:
@@ -93,8 +91,7 @@ engine:
                 with: "'<!--start-jvm-image'"
               - text: '<!--end-jvm-image-->'
                 with: "'end-jvm-image-->'"
-      - include: [ "pom.xml" ]
-        condition: "!(#activeProfiles.contains('native'))"
+      - condition: "!(#activeProfiles.contains('native'))"
         chain:
           - type: ReplaceText
             substitutions:
@@ -102,8 +99,7 @@ engine:
                 with: "'<!--start-native'"
               - text: '<!--end-native-->'
                 with: "'end-native-->'"
-      - include: [ "pom.xml" ]
-        condition: "!(#activeProfiles.contains('native-image'))"
+      - condition: "!(#activeProfiles.contains('native-image'))"
         chain:
           - type: ReplaceText
             substitutions:
