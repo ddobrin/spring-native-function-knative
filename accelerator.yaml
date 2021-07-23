@@ -65,16 +65,26 @@ accelerator:
       defaultValue: docker.io/triathlonguy
 
 engine:
-  merge:
-    - include: [ "**" ]
-      exclude: [ "kubernetes/**" ]
+  # merge:
+  #   - include: [ "**" ]
+  #     exclude: [ "kubernetes/**" ]
+  #   - include: [ "pom.xml" ]
+  #     chain:
+  #     - type: ReplaceText
+  #       substitutions:
+  #       - text: hello-function
+  #         with: "#artifactId"
+
+  include: [ "**" ]
+  exclude: [ "kubernetes/**" ]
+
+  chain:
     - include: [ "pom.xml" ]
       chain:
       - type: ReplaceText
         substitutions:
         - text: hello-function
           with: "#artifactId"
-  chain:
     - include: [ "pom.xml" ]
       condition: "!(#activeProfiles.contains('jvm'))"
       chain:
