@@ -65,20 +65,9 @@ accelerator:
       defaultValue: docker.io/triathlonguy
 
 engine:
-  # merge:
-  #   - include: [ "**" ]
-  #     exclude: [ "kubernetes/**" ]
-  #   - include: [ "pom.xml" ]
-  #     chain:
-  #     - type: ReplaceText
-  #       substitutions:
-  #       - text: hello-function
-  #         with: "#artifactId"
-
-  include: [ "**" ]
-  exclude: [ "kubernetes/**" ]
-
   chain:
+    - include: [ "**" ]
+      exclude: [ "kubernetes/**" ]
     - include: [ "pom.xml" ]
       chain:
       - type: ReplaceText
@@ -166,4 +155,3 @@ engine:
         substitutions:
         - text: "registryPrefix"
           with: "#prefixContainerRegistryName"
-
