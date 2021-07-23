@@ -65,7 +65,7 @@ accelerator:
       defaultValue: docker.io/triathlonguy
 
 engine:
-  merge:
+  chain:
     - include: [ "**" ]
       exclude: [ "kubernetes/**" ]
     - include: [ "pom.xml" ]
