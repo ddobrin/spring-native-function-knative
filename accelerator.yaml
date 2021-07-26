@@ -70,43 +70,38 @@ engine:
       exclude: [ "kubernetes/**" ]
     - chain:   
       - include: [ "pom.xml" ]
-        chain:
-        - type: ReplaceText
-          substitutions:
-          - text: hello-function
-            with: "#artifactId"
-      - condition: "!(#activeProfiles.contains('jvm'))"
-        chain:
-        - type: ReplaceText
-          substitutions:
-          - text: '<!--start-jvm-->'
-            with: "'<!--start-jvm'"
-          - text: '<!--end-jvm-->'
-            with: "'end-jvm-->'"
-      - condition: "!(#activeProfiles.contains('jvm-image'))"
-        chain:
-          - type: ReplaceText
-            substitutions:
-              - text: '<!--start-jvm-image-->'
-                with: "'<!--start-jvm-image'"
-              - text: '<!--end-jvm-image-->'
-                with: "'end-jvm-image-->'"
-      - condition: "!(#activeProfiles.contains('native'))"
-        chain:
-          - type: ReplaceText
-            substitutions:
-              - text: '<!--start-native-->'
-                with: "'<!--start-native'"
-              - text: '<!--end-native-->'
-                with: "'end-native-->'"
-      - condition: "!(#activeProfiles.contains('native-image'))"
-        chain:
-          - type: ReplaceText
-            substitutions:
-              - text: '<!--start-native-image-->'
-                with: "'<!--start-native-image'"
-              - text: '<!--end-native-image-->'
-                with: "'end-native-image-->'"
+      - type: ReplaceText
+        substitutions:
+        - text: hello-function
+          with: "#artifactId"
+      - type: ReplaceText
+        condition: "!(#activeProfiles.contains('jvm'))"
+        substitutions:
+        - text: '<!--start-jvm-->'
+          with: "'<!--start-jvm'"
+        - text: '<!--end-jvm-->'
+          with: "'end-jvm-->'"
+      - type: ReplaceText
+        condition: "!(#activeProfiles.contains('jvm-image'))"
+        substitutions:
+          - text: '<!--start-jvm-image-->'
+            with: "'<!--start-jvm-image'"
+          - text: '<!--end-jvm-image-->'
+            with: "'end-jvm-image-->'"
+      - type: ReplaceText
+        condition: "!(#activeProfiles.contains('native'))"
+        substitutions:
+          - text: '<!--start-native-->'
+            with: "'<!--start-native'"
+          - text: '<!--end-native-->'
+            with: "'end-native-->'"
+      - type: ReplaceText
+        condition: "!(#activeProfiles.contains('native-image'))"
+        substitutions:
+          - text: '<!--start-native-image-->'
+            with: "'<!--start-native-image'"
+          - text: '<!--end-native-image-->'
+            with: "'end-native-image-->'"
 
     - include: ["kubernetes/kn/*/service*.yaml"]
       condition: "#deploymentType == 'knative-resource-simple'"
@@ -131,8 +126,6 @@ engine:
               with: "#artifactId"
     - include: ["kubernetes/kpack/*/image*.yaml"]
       condition: "#includeKpackImage"
-      # logical operators for conditions
-      # condition: "#includeKpackImage and #deploymentType == 'none'"
       chain:
       - type: ReplaceText
         substitutions:
