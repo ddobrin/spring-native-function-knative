@@ -22,5 +22,5 @@ spec:
     git:
       revision: main
       url: https://github.com/ddobrin/spring-native-function-knative.git
-  tag: hello-function-jvm:latest
+  tag: registryPrefix/hello-function-jvm:latest
 status: {}

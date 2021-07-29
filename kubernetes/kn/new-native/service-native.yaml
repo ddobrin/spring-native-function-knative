@@ -7,7 +7,7 @@ spec:
   template:
     metadata:
       annotations:
-        client.knative.dev/user-image: hello-function-native:latest
+        client.knative.dev/user-image: registryPrefix/hello-function-native:latest
       name: hello-function-v1
     spec:
       containerConcurrency: 10
