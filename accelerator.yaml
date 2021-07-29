@@ -138,6 +138,10 @@ engine:
         substitutions:
         - text: "hello-function"
           with: "#artifactId"
+      - type: ReplaceText
+        substitutions:
+        - text: "registryPrefix"
+          with: "#prefixContainerRegistryName"
     - include: ["kubernetes/kn/*/service*.yaml"]
       condition: "#deploymentType == 'knative-resource-simple'"
       chain:
