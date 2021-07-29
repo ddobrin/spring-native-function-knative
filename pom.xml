@@ -21,7 +21,7 @@
 
         <jvm-image-type>jvm</jvm-image-type>
         <native-image-type>native</native-image-type>
-        <registry>gcr.io/pa-ddobrin</registry>
+        <registry>registryPrefix</registry>
         <repackage.classifier/>
     </properties>
     <dependencies>

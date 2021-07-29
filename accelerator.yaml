@@ -75,6 +75,10 @@ engine:
         - text: hello-function
           with: "#artifactId"
       - type: ReplaceText
+        substitutions:
+        - text: "registryPrefix"
+          with: "#prefixContainerRegistryName"
+      - type: ReplaceText
         condition: "!(#activeProfiles.contains('jvm'))"
         substitutions:
         - text: '<!--start-jvm-->'
