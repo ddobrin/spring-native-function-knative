@@ -123,14 +123,14 @@ engine:
     - include: ["kubernetes/skaffold/*/skaffold.yaml"]
       condition: "#includeSkaffold"        
       chain:
-        - type: ReplaceText
-          substitutions:
-          - text: "hello-function"
-            with: "#artifactId"
-        - type: ReplaceText
-          substitutions:
-          - text: "registryPrefix"
-            with: "#prefixContainerRegistryName"
+      - type: ReplaceText
+        substitutions:
+        - text: "hello-function"
+          with: "#artifactId"
+      - type: ReplaceText
+        substitutions:
+        - text: "registryPrefix"
+          with: "#prefixContainerRegistryName"
     - include: ["kubernetes/kpack/*/image*.yaml"]
       condition: "#includeKpackImage"
       chain:
