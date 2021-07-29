@@ -161,6 +161,9 @@ engine:
       onConflict: Append
       sources:
       - include: [ "kubernetes/docs/README.md"]
+        chain:
+        - type: RewritePath
+          rewriteTo: "'README.md'"       
       - include: [ "kubernetes/docs/DEPLOY-K8s.md" ]
         condition: "#deploymentType == 'kubernetes-resource-simple'"
         chain:
