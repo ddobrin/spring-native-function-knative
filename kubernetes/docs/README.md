@@ -1,3 +1,5 @@
+# Accelerator generated project - Spring Cloud Function JVM/Native on K8s/Knative
+
 This sample app provides a simple `Hello` web app based on Spring Boot and Spring Cloud Functions.
 It provides multiple deployment options and common Knative use-cases which developers are looking for.
 

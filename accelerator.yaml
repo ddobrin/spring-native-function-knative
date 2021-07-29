@@ -175,7 +175,7 @@ engine:
         - type: RewritePath
           rewriteTo: "'README.md'"          
       - include: [ "kubernetes/docs/KPACK.md" ]
-        condition: "#deploymentType == #includeKpackImage"
+        condition: "#includeKpackImage"
         chain:
         - type: RewritePath
           rewriteTo: "'README.md'"                    
