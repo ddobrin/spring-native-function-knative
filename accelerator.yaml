@@ -168,9 +168,11 @@ engine:
           rewriteTo: "'README.md'"
       - include: [ "kubernetes/docs/DEPLOY-KN.md" ]
         condition: "#deploymentType == 'knative-resource-simple'"
+        chain:
         - type: RewritePath
           rewriteTo: "'README.md'"          
       - include: [ "kubernetes/docs/KPACK.md" ]
         condition: "#deploymentType == #includeKpackImage"
+        chain:
         - type: RewritePath
           rewriteTo: "'README.md'"                    
