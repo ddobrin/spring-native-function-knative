@@ -67,7 +67,7 @@ accelerator:
 engine:
   merge:
     - include: [ "**" ]
-      exclude: [ "kubernetes/**" ]
+      exclude: [ "kubernetes/**", "README.md" ]
     - chain:   
       - include: [ "pom.xml" ]
       - type: ReplaceText
@@ -156,3 +156,21 @@ engine:
         substitutions:
         - text: "registryPrefix"
           with: "#prefixContainerRegistryName"
+    - name: README
+      type: Combo
+      onConflict: Append
+      sources:
+      - include: [ "kubernetes/docs/README.md"]
+      - include: [ "kubernetes/docs/DEPLOY-K8s.md" ]
+        condition: "#deploymentType == 'kubernetes-resource-simple'"
+        chain:
+        - type: RewritePath
+          rewriteTo: "'README.md'"
+      - include: [ "kubernetes/docs/DEPLOY-KN.md" ]
+        condition: "#deploymentType == 'knative-resource-simple'"
+        - type: RewritePath
+          rewriteTo: "'README.md'"          
+      - include: [ "kubernetes/docs/KPACK.md" ]
+        condition: "#deploymentType == #includeKpackImage"
+        - type: RewritePath
+          rewriteTo: "'README.md'"                    

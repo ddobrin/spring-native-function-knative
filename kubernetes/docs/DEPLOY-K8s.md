@@ -1,7 +1,6 @@
-# Deploy
+# Deploy Kubernetes
 
 ```shell
-
 # Docker run
 # run a JVM image
 docker run --rm -p 8080:8080 gcr.io/pa-ddobrin/hello-function-jvm:latest 
@@ -37,16 +36,4 @@ skaffold -f kubernetes/k8s/skaffold/skaffold.yaml run -p native  --port-forward
 
 # delete a Native image
 skaffold -f kubernetes/k8s/skaffold/skaffold.yaml delete -p native
-
-# Knative Service
-
-# create function with Knative CLI
-# JVM image
-kn service create hello-function -n hello-function --image gcr.io/pa-ddobrin/hello-function-jvm:latest --env TARGET="from Serverless Test - Spring Function on JVM" --revision-name hello-function-v1 
-
-# Native image
-kn service create hello-function -n hello-function --image gcr.io/pa-ddobrin/hello-function-native:latest --env TARGET="from Serverless Test - Spring Function on JVM" --revision-name hello-function-v1 
-
-# delete a service
-kn service delete hello-function -n hello-function
 ```
