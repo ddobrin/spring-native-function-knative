@@ -49,13 +49,13 @@ accelerator:
       label: Generate Skaffold file
       description: Include a Skaffold image YAML file for K8s deployment
       dataType: boolean
-      defaultValue: false
+      defaultValue: true
       inputType: toggle
     - name: includeKpackImage
       label: Generate kpack file
       description: Include a kpack image YAML file
       dataType: boolean
-      defaultValue: false
+      defaultValue: true
       inputType: toggle
     - name: prefixContainerRegistryName
       label: Registry Prefix
@@ -120,7 +120,7 @@ engine:
         substitutions:
         - text: "hello-function"
           with: "#artifactId"
-    - include: ["kubernetes/skaffold/*/skaffold.yaml"]
+    - include: ["kubernetes/skaffold/skaffold.yaml"]
       condition: "#includeSkaffold"        
       chain:
       - type: ReplaceText
