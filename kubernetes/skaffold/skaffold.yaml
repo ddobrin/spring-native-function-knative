@@ -6,7 +6,7 @@ build:
   tagPolicy:
     sha256: {}
   artifacts:
-    - image: hello-function-jvm
+    - image: registryPrefix/hello-function-jvm
       custom:
         buildCommand: ./mvnw spring-boot:build-image -DskipTests -Pjvm-image -Dspring-boot.build-image.imageName=$IMAGE
         dependencies:
@@ -21,9 +21,21 @@ deploy:
 portForward:
   - resourceType: service
     resourceName: hello-function
+    port: 80
     localPort: 8080
 profiles:
   - name: local
     build:
       local:
-        push: false
+        push: true
+  - name: native
+    build:
+      artifacts:
+      - image: registryPrefix/hello-function-native
+        custom:
+          buildCommand: ./mvnw spring-boot:build-image -Pnative-image -DskipTests -Dspring-boot.build-image.imageName=$IMAGE
+          dependencies:
+            paths:
+              - src
+              - pom.xml
+        
