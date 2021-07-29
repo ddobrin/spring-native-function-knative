@@ -106,7 +106,6 @@ engine:
             with: "'<!--start-native-image'"
           - text: '<!--end-native-image-->'
             with: "'end-native-image-->'"
-
     - include: ["kubernetes/kn/*/service*.yaml"]
       condition: "#deploymentType == 'knative-resource-simple'"
       chain:
@@ -121,17 +120,17 @@ engine:
         substitutions:
         - text: "hello-function"
           with: "#artifactId"
-    - chain:
-      - include: ["kubernetes/skaffold/*/skaffold.yaml"]
-      - condition: "#includeSkaffold"
-      - type: ReplaceText
-        substitutions:
-        - text: "hello-function"
-          with: "#artifactId"
-      - type: ReplaceText
-        substitutions:
-        - text: "registryPrefix"
-          with: "#prefixContainerRegistryName"
+    - include: ["kubernetes/skaffold/*/skaffold.yaml"]
+      condition: "#includeSkaffold"        
+      chain:
+        - type: ReplaceText
+          substitutions:
+          - text: "hello-function"
+            with: "#artifactId"
+        - type: ReplaceText
+          substitutions:
+          - text: "registryPrefix"
+            with: "#prefixContainerRegistryName"
     - include: ["kubernetes/kpack/*/image*.yaml"]
       condition: "#includeKpackImage"
       chain:
