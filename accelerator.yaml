@@ -121,9 +121,9 @@ engine:
         substitutions:
         - text: "hello-function"
           with: "#artifactId"
-    - include: ["kubernetes/skaffold/*/skaffold.yaml"]
-      condition: "#includeSkaffold"
-      chain:
+    - chain:
+      - include: ["kubernetes/skaffold/*/skaffold.yaml"]
+        condition: "#includeSkaffold"
         - type: ReplaceText
           substitutions:
           - text: "hello-function"
