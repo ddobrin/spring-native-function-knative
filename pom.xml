@@ -15,7 +15,7 @@
     <description>A simple example of a Function deployed in Knative, available as JVM or Native Image</description>
     <properties>
         <java.version>11</java.version>
-		<spring-cloud.version>2020.0.3</spring-cloud.version>
+		<spring-cloud.version>2020.0.4</spring-cloud.version>
         <spring-native.version>0.10.4</spring-native.version>
         <native-buildtools.version>0.9.3</native-buildtools.version>
 
