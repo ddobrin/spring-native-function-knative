@@ -2,13 +2,14 @@ This sample app provides a simple `Hello` web app based on Spring Boot and Sprin
 It provides multiple deployment options and common Knative use-cases which developers are looking for.
 
 `Currently Tracked Versions:`
-* Spring Boot 2.5.2 - as of June 2021
-* Spring Native 0.10.1 (Spring Native Beta) - as of June 20210
+* Spring Boot 2.5.5 - as of September 2021
+* Spring Native 0.10.4 (Spring Native Beta) - as of September 2021
+* Natie Buildtools 0.9.3 - as of September 2021
 * OpenJDK
-    * openjdk version "11.0.11" 2021-04-20
+    * openjdk version "11.0.12" 2021-07-20
 * GraalVM CE
-    *  OpenJDK Runtime Environment GraalVM CE 21.1.0 (build 11.0.11+8-jvmci-21.1-b05)
-    *  OpenJDK 64-Bit Server VM GraalVM CE 21.1.0 (build 11.0.11+8-jvmci-21.1-b05, mixed mode, sharing)
+    *  OpenJDK Runtime Environment GraalVM CE 21.2.0 (build 11.0.11+8-jvmci-21.1-b05)
+    *  OpenJDK 64-Bit Server VM GraalVM CE 21.1.0 (build 11.0.12+6-jvmci-21.2-b08, mixed mode, sharing)
     
 This repo addresses the following topics:
 1. Build 
@@ -16,7 +17,7 @@ This repo addresses the following topics:
   * Build a JVM / Native Docker image with Java and Java Native Paketo Buildpacks
 * CI/CD integration - Build a JVM / Native Docker image with kpack / Tanzu Build Service
 2. Deploy 
-  * Run locally / Kubernetes / Knative / Tanzu Serveless
+  * Run locally / Kubernetes / Knative / Tanzu Cloud Native Runtime
 3. Install Tanzu Serverless 
 4. Serverless use-cases:
   * [x] Deployment of containers with the KNative(kn) CLI 
@@ -85,7 +86,7 @@ $ curl -w'\n' -H 'Content-Type: text/plain' localhost:8080 -d "from a Function"
 ```bash 
 # switch to the GraalVM JDK for this build
 # ex, when using SDKman
-$ sdk use java 21.1.0.r11-grl
+$ sdk use java 21.2.0.r11-grl
 
 # build and run code using
 $ ./mvnw clean package -Pnative
